@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Indicadores Comerciais - Braúna</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px 32px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 16px 32px;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: #e9ecef;
+            color: #667eea;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px 32px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        button {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        input[type="text"], input[type="number"] {
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .content-wrapper {
+            height: 800px;
+        }
+
+        .map-container {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+            position: relative;
+            overflow: auto;
+            cursor: grab;
+        }
+
+        .map-container:active {
+            cursor: grabbing;
+        }
+
+        .insights-container {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .insights-section {
+            margin-bottom: 48px;
+        }
+
+        .insights-section h2 {
+            color: #667eea;
+            font-size: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .insight-item {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            padding-right: 50px;
+        }
+
+        .insight-item.warning {
+            border-left-color: #f39c12;
+        }
+
+        .insight-item.critical {
+            border-left-color: #e74c3c;
+        }
+
+        .insight-item p {
+            font-size: 15px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .delete-insight-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-insight-btn:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+
+        .add-insight-btn {
+            margin-top: 16px;
+        }
+
+        #map-container:active {
+            cursor: grabbing;
+        }
+
+        .map {
+            position: relative;
+            padding: 40px;
+            min-width: 4500px;
+            min-height: 3500px;
+        }
+
+        .node-box {
+            position: absolute;
+            background: #667eea;
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 160px;
+            text-align: center;
+            border: 3px solid white;
+        }
+
+        .node-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+        }
+
+        .node-box.collapsed::after {
+            content: '+';
+            position: absolute;
+            right: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: inherit;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .node-box.expanded::after {
+            content: '−';
+            position: absolute;
+            right: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 24px;
+            height: 24px;
+            background: white;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: inherit;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .node-title {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .node-value {
+            font-size: 11px;
+            font-weight: 600;
+            opacity: 0.95;
+        }
+
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: #b8c5d6;
+            opacity: 0.6;
+            transform-origin: left center;
+            pointer-events: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 32px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 24px;
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+        }
+
+        .form-group textarea {
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 10px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .btn-close {
+            background: #dc3545;
+            border-color: #dc3545;
+            color: white;
+        }
+
+        .zoom-level {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Mapa de Indicadores Comerciais - Braúna</h1>
+            <p>Visualização interativa dos resultados e gargalos operacionais</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('consolidado2025')">📊 Consolidado 2025</button>
+            <button class="tab" onclick="switchTab('consolidado2026')">📈 Consolidado 2026</button>
+            <button class="tab" onclick="switchTab('mesAnalise')">🔍 Mês de Análise</button>
+            <button class="tab" onclick="switchTab('insights')">💭 Reflexões</button>
+        </div>
+
+        <!-- TAB: Consolidado 2025 -->
+        <div id="consolidado2025" class="tab-content active">
+            <div class="controls">
+                <div class="control-group">
+                    <button onclick="zoomIn('map2025')">🔍 Zoom +</button>
+                    <button onclick="zoomOut('map2025')">🔍 Zoom -</button>
+                    <button onclick="resetZoom('map2025')">↺ Resetar</button>
+                    <span class="zoom-level" id="zoomLevel2025">100%</span>
+                </div>
+                
+                <div class="control-group">
+                    <button onclick="expandAll('map2025')">⊕ Expandir Tudo</button>
+                    <button onclick="collapseAll('map2025')">⊖ Retrair Tudo</button>
+                </div>
+            </div>
+            
+            <div class="content-wrapper">
+                <div id="map-container-2025" class="map-container">
+                    <div id="map2025" class="map"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Consolidado 2026 -->
+        <div id="consolidado2026" class="tab-content">
+            <div class="controls">
+                <div class="control-group">
+                    <button onclick="zoomIn('map2026')">🔍 Zoom +</button>
+                    <button onclick="zoomOut('map2026')">🔍 Zoom -</button>
+                    <button onclick="resetZoom('map2026')">↺ Resetar</button>
+                    <span class="zoom-level" id="zoomLevel2026">100%</span>
+                </div>
+                
+                <div class="control-group">
+                    <button onclick="expandAll('map2026')">⊕ Expandir Tudo</button>
+                    <button onclick="collapseAll('map2026')">⊖ Retrair Tudo</button>
+                </div>
+                
+                <div class="control-group">
+                    <button class="btn-primary" onclick="openUpdateModal('2026')">📊 Atualizar Dados</button>
+                </div>
+            </div>
+            
+            <div class="content-wrapper">
+                <div id="map-container-2026" class="map-container">
+                    <div id="map2026" class="map"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Mês de Análise -->
+        <div id="mesAnalise" class="tab-content">
+            <div class="controls">
+                <div class="control-group">
+                    <button onclick="zoomIn('mapMes')">🔍 Zoom +</button>
+                    <button onclick="zoomOut('mapMes')">🔍 Zoom -</button>
+                    <button onclick="resetZoom('mapMes')">↺ Resetar</button>
+                    <span class="zoom-level" id="zoomLevelMes">100%</span>
+                </div>
+                
+                <div class="control-group">
+                    <button onclick="expandAll('mapMes')">⊕ Expandir Tudo</button>
+                    <button onclick="collapseAll('mapMes')">⊖ Retrair Tudo</button>
+                </div>
+                
+                <div class="control-group">
+                    <button class="btn-primary" onclick="openUpdateModal('mes')">📊 Atualizar Dados</button>
+                </div>
+            </div>
+            
+            <div class="content-wrapper">
+                <div id="map-container-mes" class="map-container">
+                    <div id="mapMes" class="map"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: Reflexões -->
+        <div id="insights" class="tab-content">
+            <div class="insights-container">
+                <div class="insights-section">
+                    <h2>💭 Reflexões - Consolidado 2025</h2>
+                    <div id="insights2025">
+                        <div class="insight-item warning">
+                            <p>Conseguimos a geração de contatos almejada, no entanto 48% vindo de fontes que não são tão eficientes (AD + Redes Sociais)</p>
+                            <button class="delete-insight-btn" onclick="this.parentElement.remove()">×</button>
+                        </div>
+                        <div class="insight-item critical">
+                            <p>Churn Faturamento muito acima do esperado</p>
+                            <button class="delete-insight-btn" onclick="this.parentElement.remove()">×</button>
+                        </div>
+                        <div class="insight-item warning">
+                            <p>Crédito e Seguros trabalhando em eficiência e não em volume → Será que é sustentável ao longo do tempo?</p>
+                            <button class="delete-insight-btn" onclick="this.parentElement.remove()">×</button>
+                        </div>
+                    </div>
+                    <button class="btn-primary add-insight-btn" onclick="openInsightModal('2025')">+ Adicionar Reflexão</button>
+                </div>
+
+                <div class="insights-section">
+                    <h2>💭 Reflexões - Consolidado 2026</h2>
+                    <div id="insights2026">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <p>Nenhuma reflexão adicionada ainda</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary add-insight-btn" onclick="openInsightModal('2026')">+ Adicionar Reflexão</button>
+                </div>
+
+                <div class="insights-section">
+                    <h2>💭 Reflexões - Mês de Análise</h2>
+                    <div id="insightsMes">
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📝</div>
+                            <p>Nenhuma reflexão adicionada ainda</p>
+                        </div>
+                    </div>
+                    <button class="btn-primary add-insight-btn" onclick="openInsightModal('mes')">+ Adicionar Reflexão</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Atualização -->
+    <div id="updateModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <h2>Atualizar Indicadores</h2>
+            
+            <div class="form-group">
+                <label>Período/Mês de Referência:</label>
+                <input type="text" id="periodo" placeholder="Ex: Janeiro 2026">
+            </div>
+
+            <h3 style="margin: 24px 0 16px 0; color: #333; font-size: 18px;">💰 Receitas Principais</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label>Receita Total (R$):</label>
+                    <input type="number" id="receitaTotal" placeholder="6344000">
+                </div>
+                <div class="form-group">
+                    <label>Receita Planejamento (R$):</label>
+                    <input type="number" id="receitaPlanejamento" placeholder="4240000">
+                </div>
+                <div class="form-group">
+                    <label>Receita Seguros (R$):</label>
+                    <input type="number" id="receitaSeguros" placeholder="643966">
+                </div>
+                <div class="form-group">
+                    <label>Receita Créditos (R$):</label>
+                    <input type="number" id="receitaCreditos" placeholder="1066000">
+                </div>
+            </div>
+
+            <h3 style="margin: 24px 0 16px 0; color: #5dade2; font-size: 18px;">🔵 Planejamento</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label>Planejamento Contratado (R$):</label>
+                    <input type="number" id="planejamentoContratado" placeholder="5464000">
+                </div>
+                <div class="form-group">
+                    <label>Planejamento Novo (R$):</label>
+                    <input type="number" id="planejamentoNovo" placeholder="4267000">
+                </div>
+                <div class="form-group">
+                    <label>Renovação (R$):</label>
+                    <input type="number" id="renovacao" placeholder="990740">
+                </div>
+                <div class="form-group">
+                    <label>Churn Faturamento (%):</label>
+                    <input type="number" id="churnFaturamento" step="0.01" placeholder="23.16">
+                </div>
+                <div class="form-group">
+                    <label>Contatos/AA (%):</label>
+                    <input type="number" id="contatosAA" step="0.01" placeholder="24.04">
+                </div>
+                <div class="form-group">
+                    <label>Leads (quantidade):</label>
+                    <input type="number" id="leads" placeholder="11015">
+                </div>
+            </div>
+
+            <div style="margin: 16px 0 0 20px;">
+                <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Fontes dos Leads:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Aquisição Digital:</label>
+                        <input type="number" id="leadsAquisicaoDigital" placeholder="1546">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Redes Sociais:</label>
+                        <input type="number" id="leadsRedesSociais" placeholder="3763">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Palestra:</label>
+                        <input type="number" id="leadsPalestra" placeholder="966">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Indicações AAI:</label>
+                        <input type="number" id="leadsIndicacoesAAI" placeholder="138">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Restante:</label>
+                        <input type="number" id="leadsRestante" placeholder="4604">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
+                <div class="form-group">
+                    <label>Análise Agendada (qtd):</label>
+                    <input type="number" id="analiseAgendada" placeholder="4147">
+                </div>
+                <div class="form-group">
+                    <label>AA/PP (%):</label>
+                    <input type="number" id="aaPP" step="0.01" placeholder="22.5">
+                </div>
+                <div class="form-group">
+                    <label>Planejamentos (qtd):</label>
+                    <input type="number" id="planejamentos" placeholder="1103">
+                </div>
+                <div class="form-group">
+                    <label>Ticket Médio Plan. (R$):</label>
+                    <input type="number" id="ticketMedioPlan" step="0.01" placeholder="441.67">
+                </div>
+                <div class="form-group">
+                    <label>Eficiência Renovação (%):</label>
+                    <input type="number" id="eficienciaRenovacao" step="0.01" placeholder="29.79">
+                </div>
+                <div class="form-group">
+                    <label>Ticket Médio Renov. (R$):</label>
+                    <input type="number" id="ticketMedioRenov" step="0.01" placeholder="500">
+                </div>
+            </div>
+
+            <div style="margin: 16px 0 0 20px;">
+                <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Produção por Planejador:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Contatos por mês:</label>
+                        <input type="number" id="contatosPorPlanejador" step="0.01" placeholder="16">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Análises por mês:</label>
+                        <input type="number" id="analisesPorPlanejador" step="0.01" placeholder="7.05">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Produção por mês (R$):</label>
+                        <input type="number" id="producaoPorPlanejadorPlan" step="0.01" placeholder="11500">
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin: 24px 0 16px 0; color: #f4d03f; font-size: 18px;">🟡 Seguros</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label>Seguros Novos (R$):</label>
+                    <input type="number" id="segurosNovos" placeholder="1428000">
+                </div>
+                <div class="form-group">
+                    <label>Inscrição Base Ativa (%):</label>
+                    <input type="number" id="inscricaoBase" step="0.01" placeholder="39.88">
+                </div>
+                <div class="form-group">
+                    <label>Ticket Médio Seguros (R$):</label>
+                    <input type="number" id="ticketMedioSeguros" step="0.01" placeholder="256.21">
+                </div>
+                <div class="form-group">
+                    <label>Oportunidade/GR (%):</label>
+                    <input type="number" id="oportunidadeGR" step="0.01" placeholder="42.40">
+                </div>
+                <div class="form-group">
+                    <label>Oportunidades (qtd):</label>
+                    <input type="number" id="oportunidadesSeguros" placeholder="1099">
+                </div>
+                <div class="form-group">
+                    <label>GR/Implantado (%):</label>
+                    <input type="number" id="grImplantado" step="0.01" placeholder="52.9">
+                </div>
+                <div class="form-group">
+                    <label>Reuniões (qtd):</label>
+                    <input type="number" id="reunioes" placeholder="454">
+                </div>
+            </div>
+
+            <div style="margin: 16px 0 0 20px;">
+                <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Por Planejador - Seguros:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Oportunidades por mês:</label>
+                        <input type="number" id="oportunidadesPorPlanejadorSeg" step="0.01" placeholder="1.86">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">GRs por mês:</label>
+                        <input type="number" id="grsPorPlanejador" step="0.01" placeholder="0.77">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Produção por mês (R$):</label>
+                        <input type="number" id="producaoPorPlanejadorSeg" step="0.01" placeholder="2428">
+                    </div>
+                </div>
+            </div>
+
+            <h3 style="margin: 24px 0 16px 0; color: #7dcea0; font-size: 18px;">🟢 Créditos</h3>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label>Créditos e Outros (R$):</label>
+                    <input type="number" id="creditosOutros" placeholder="57400000">
+                </div>
+                <div class="form-group">
+                    <label>Ticket Médio Créd. (R$):</label>
+                    <input type="number" id="ticketMedioCreditos" placeholder="526000">
+                </div>
+                <div class="form-group">
+                    <label>Eficiência Oport./Venda (%):</label>
+                    <input type="number" id="eficienciaCreditos" step="0.01" placeholder="54.22">
+                </div>
+                <div class="form-group">
+                    <label>Oportunidades (qtd):</label>
+                    <input type="number" id="oportunidadesCreditos" placeholder="201">
+                </div>
+                <div class="form-group">
+                    <label>Vendas (qtd):</label>
+                    <input type="number" id="vendasCreditos" placeholder="109">
+                </div>
+            </div>
+
+            <div style="margin: 16px 0 0 20px;">
+                <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Por Planejador - Créditos:</label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Oportunidades por mês:</label>
+                        <input type="number" id="oportunidadesPorPlanejadorCred" step="0.01" placeholder="0.34">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Vendas por mês:</label>
+                        <input type="number" id="vendasPorPlanejador" step="0.01" placeholder="0.18">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px;">
+                        <label style="font-size: 13px;">Produção por mês (R$):</label>
+                        <input type="number" id="producaoPorPlanejadorCred" step="0.01" placeholder="97620">
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 32px;">
+                <button class="btn-primary" onclick="saveUpdate()" style="flex: 1;">✓ Salvar Dados</button>
+                <button class="btn-close" onclick="closeUpdateModal()">✕ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Reflexões -->
+    <div id="insightModal" class="modal">
+        <div class="modal-content">
+            <h2>Adicionar Reflexão</h2>
+            
+            <div class="form-group">
+                <label>Tipo de Reflexão:</label>
+                <select id="insightType">
+                    <option value="">Informativo</option>
+                    <option value="warning">⚠️ Atenção</option>
+                    <option value="critical">🔴 Crítico</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Descrição da Reflexão:</label>
+                <textarea id="insightText" placeholder="Descreva a reflexão..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 32px;">
+                <button class="btn-primary" onclick="saveInsight()" style="flex: 1;">✓ Adicionar</button>
+                <button class="btn-close" onclick="closeInsightModal()">✕ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript code will be embedded here
+    </script>
+    
+</body>
+</html><script>
+// Dados 2025 (fixos - não serão atualizados)
+const data2025 = {
+    name: "Resultados 2025",
+    value: "R$6.344.000,00",
+    color: "#667eea",
+    expanded: true,
+    children: [
+        {
+            name: "Receitas",
+            value: "R$6.344.000,00",
+            color: "#9b59b6",
+            expanded: true,
+            children: [
+                {
+                    name: "Receita Planejamento",
+                    value: "R$4.240.000,00",
+                    color: "#5dade2",
+                    expanded: false,
+                    children: [
+                        {
+                            name: "Planejamento Contratado",
+                            value: "R$5.464.000,00",
+                            color: "#5dade2",
+                            expanded: false,
+                            children: [
+                                {
+                                    name: "Planejamento Novo",
+                                    value: "R$4.267.000,00",
+                                    color: "#5dade2",
+                                    expanded: false,
+                                    children: [
+                                        {
+                                            name: "Eficiência",
+                                            value: "",
+                                            color: "#5dade2",
+                                            expanded: false,
+                                            children: [
+                                                {
+                                                    name: "Contatos/AA",
+                                                    value: "24,04%",
+                                                    color: "#5dade2",
+                                                    expanded: false,
+                                                    children: [
+                                                        {
+                                                            name: "Leads",
+                                                            value: "11.015",
+                                                            color: "#5dade2",
+                                                            expanded: false,
+                                                            children: [
+                                                                { name: "Aquisição Digital", value: "1546", color: "#5dade2" },
+                                                                { name: "Redes Sociais", value: "3763", color: "#5dade2" },
+                                                                { name: "Palestra", value: "966", color: "#5dade2" },
+                                                                { name: "Indicações AAI", value: "138", color: "#5dade2" },
+                                                                { name: "Restante", value: "4604", color: "#5dade2" }
+                                                            ]
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    name: "Análise Agendada",
+                                                    value: "4147",
+                                                    color: "#5dade2",
+                                                    expanded: false,
+                                                    children: [
+                                                        {
+                                                            name: "AA / PP",
+                                                            value: "22,5%",
+                                                            color: "#5dade2",
+                                                            expanded: false,
+                                                            children: [
+                                                                { name: "Planejamentos", value: "1103", color: "#5dade2" }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        { name: "Ticket Médio", value: "R$441,67", color: "#5dade2" }
+                                    ]
+                                },
+                                {
+                                    name: "Renovação",
+                                    value: "R$990.740,00",
+                                    color: "#5dade2",
+                                    expanded: false,
+                                    children: [
+                                        { name: "Eficiência", value: "29,79%", color: "#5dade2" },
+                                        { name: "Ticket Médio", value: "R$500,00", color: "#5dade2" }
+                                    ]
+                                },
+                                { name: "Churn Faturamento", value: "23,16%", color: "#5dade2" },
+                                {
+                                    name: "Produção por Planejador",
+                                    value: "",
+                                    color: "#5dade2",
+                                    expanded: false,
+                                    children: [
+                                        { name: "Contatos por mês", value: "16", color: "#5dade2" },
+                                        { name: "Análises por mês", value: "7,05", color: "#5dade2" },
+                                        { name: "Produção por mês", value: "R$11.500", color: "#5dade2" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Receita Seguros",
+                    value: "R$643.966,78",
+                    color: "#f4d03f",
+                    expanded: false,
+                    children: [
+                        {
+                            name: "Seguros Novos",
+                            value: "R$1.428.000,00",
+                            color: "#f4d03f",
+                            expanded: false,
+                            children: [
+                                { name: "Inscrição na base ativa", value: "39,88%", color: "#f4d03f" },
+                                { name: "Ticket Médio", value: "R$256,21", color: "#f4d03f" },
+                                {
+                                    name: "Eficiência",
+                                    value: "",
+                                    color: "#f4d03f",
+                                    expanded: false,
+                                    children: [
+                                        {
+                                            name: "Oportunidade/GR",
+                                            value: "42,40%",
+                                            color: "#f4d03f",
+                                            expanded: false,
+                                            children: [
+                                                { name: "Oportunidades", value: "1099", color: "#f4d03f" }
+                                            ]
+                                        },
+                                        {
+                                            name: "GR/Implantado",
+                                            value: "52,9%",
+                                            color: "#f4d03f",
+                                            expanded: false,
+                                            children: [
+                                                { name: "Reuniões", value: "454", color: "#f4d03f" }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    name: "Por Planejador",
+                                    value: "",
+                                    color: "#f4d03f",
+                                    expanded: false,
+                                    children: [
+                                        { name: "Oportunidades por mês", value: "1,86", color: "#f4d03f" },
+                                        { name: "GRs por mês", value: "0,77", color: "#f4d03f" },
+                                        { name: "Produção por mês", value: "R$2.428", color: "#f4d03f" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Receita Créditos",
+                    value: "R$1.066.000,00",
+                    color: "#7dcea0",
+                    expanded: false,
+                    children: [
+                        {
+                            name: "Créditos e Outros",
+                            value: "R$57.400.000,00",
+                            color: "#7dcea0",
+                            expanded: false,
+                            children: [
+                                {
+                                    name: "Eficiência",
+                                    value: "54,22% Oportunidade/Venda",
+                                    color: "#7dcea0",
+                                    expanded: false,
+                                    children: [
+                                        {
+                                            name: "Oportunidades",
+                                            value: "201",
+                                            color: "#7dcea0",
+                                            expanded: false,
+                                            children: [
+                                                { name: "Vendas", value: "109", color: "#7dcea0" }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                { name: "Ticket Médio", value: "R$526.000,00", color: "#7dcea0" },
+                                {
+                                    name: "Por Planejador",
+                                    value: "",
+                                    color: "#7dcea0",
+                                    expanded: false,
+                                    children: [
+                                        { name: "Oportunidades por mês", value: "0,34", color: "#7dcea0" },
+                                        { name: "Vendas por mês", value: "0,18", color: "#7dcea0" },
+                                        { name: "Produção por mês", value: "R$97.620", color: "#7dcea0" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+
+// Dados 2026 e Mês (editáveis)
+let data2026 = JSON.parse(JSON.stringify(data2025));
+data2026.name = "Resultados 2026";
+
+let dataMes = JSON.parse(JSON.stringify(data2025));
+dataMes.name = "Mês de Análise";
+
+// Estados dos mapas
+const mapStates = {
+    map2025: { zoom: 1, data: data2025 },
+    map2026: { zoom: 1, data: data2026 },
+    mapMes: { zoom: 1, data: dataMes }
+};
+
+let currentUpdateTarget = null;
+let currentInsightTarget = null;
+
+// Funções de navegação entre abas
+function switchTab(tabName) {
+    // Desativar todas as abas
+    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+    
+    // Ativar aba selecionada
+    event.target.classList.add('active');
+    document.getElementById(tabName).classList.add('active');
+    
+    // Renderizar mapa se ainda não foi renderizado
+    const mapId = tabName === 'consolidado2025' ? 'map2025' : 
+                  tabName === 'consolidado2026' ? 'map2026' : 'mapMes';
+    
+    const map = document.getElementById(mapId);
+    if (map.children.length === 0) {
+        renderTree(mapId);
+    }
+}
+
+// Funções de renderização do mapa
+function renderTree(mapId) {
+    const map = document.getElementById(mapId);
+    map.innerHTML = '';
+    const data = mapStates[mapId].data;
+    const positions = calculatePositions(data, 200, 800, 0);
+    renderNodes(data, positions, map, mapId);
+}
+
+function calculatePositions(node, x, y, depth) {
+    const positions = new Map();
+    const verticalSpacing = 120;
+    const horizontalSpacing = 250;
+
+    function countVisibleNodes(n) {
+        if (!n.children || !n.expanded) return 1;
+        return n.children.reduce((sum, child) => sum + countVisibleNodes(child), 0);
+    }
+
+    function traverse(n, px, py, d) {
+        positions.set(n, { x: px, y: py });
+        
+        if (n.children && n.expanded) {
+            const totalHeight = n.children.reduce((sum, child) => 
+                sum + countVisibleNodes(child) * verticalSpacing, 0);
+            
+            let currentY = py - totalHeight / 2 + verticalSpacing / 2;
+            
+            n.children.forEach((child, i) => {
+                const childHeight = countVisibleNodes(child) * verticalSpacing;
+                traverse(child, px + horizontalSpacing, currentY + childHeight / 2 - verticalSpacing / 2, d + 1);
+                currentY += childHeight;
+            });
+        }
+    }
+
+    traverse(node, x, y, depth);
+    return positions;
+}
+
+function renderNodes(node, positions, map, mapId) {
+    function render(n, parent) {
+        const pos = positions.get(n);
+        
+        if (parent) {
+            const parentPos = positions.get(parent);
+            const line = document.createElement('div');
+            line.className = 'connection-line';
+            
+            const startX = parentPos.x + 160;
+            const startY = parentPos.y + 30;
+            const endX = pos.x;
+            const endY = pos.y + 30;
+            
+            const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+            
+            line.style.width = length + 'px';
+            line.style.left = startX + 'px';
+            line.style.top = startY + 'px';
+            line.style.transform = `rotate(${angle}deg)`;
+            map.appendChild(line);
+        }
+
+        const box = document.createElement('div');
+        box.className = 'node-box';
+        if (n.children && n.children.length > 0) {
+            box.className += n.expanded ? ' expanded' : ' collapsed';
+        }
+        box.style.left = pos.x + 'px';
+        box.style.top = pos.y + 'px';
+        box.style.background = n.color || '#667eea';
+        
+        box.innerHTML = `
+            <div class="node-title">${n.name}</div>
+            ${n.value ? `<div class="node-value">${n.value}</div>` : ''}
+        `;
+        
+        box.onclick = () => toggleNode(n, mapId);
+        map.appendChild(box);
+
+        if (n.children && n.expanded) {
+            n.children.forEach(child => render(child, n));
+        }
+    }
+
+    render(node, null);
+}
+
+function toggleNode(node, mapId) {
+    if (node.children && node.children.length > 0) {
+        node.expanded = !node.expanded;
+        renderTree(mapId);
+    }
+}
+
+// Funções de zoom
+function zoomIn(mapId) {
+    mapStates[mapId].zoom *= 1.2;
+    const map = document.getElementById(mapId);
+    map.style.transform = `scale(${mapStates[mapId].zoom})`;
+    document.getElementById(`zoomLevel${mapId === 'map2025' ? '2025' : mapId === 'map2026' ? '2026' : 'Mes'}`).textContent = 
+        Math.round(mapStates[mapId].zoom * 100) + '%';
+}
+
+function zoomOut(mapId) {
+    mapStates[mapId].zoom *= 0.8;
+    const map = document.getElementById(mapId);
+    map.style.transform = `scale(${mapStates[mapId].zoom})`;
+    document.getElementById(`zoomLevel${mapId === 'map2025' ? '2025' : mapId === 'map2026' ? '2026' : 'Mes'}`).textContent = 
+        Math.round(mapStates[mapId].zoom * 100) + '%';
+}
+
+function resetZoom(mapId) {
+    mapStates[mapId].zoom = 1;
+    const map = document.getElementById(mapId);
+    map.style.transform = 'scale(1)';
+    const container = document.getElementById(`map-container-${mapId === 'map2025' ? '2025' : mapId === 'map2026' ? '2026' : 'mes'}`);
+    container.scrollLeft = 0;
+    container.scrollTop = 0;
+    document.getElementById(`zoomLevel${mapId === 'map2025' ? '2025' : mapId === 'map2026' ? '2026' : 'Mes'}`).textContent = '100%';
+}
+
+function expandAll(mapId) {
+    function expand(n) {
+        n.expanded = true;
+        if (n.children) n.children.forEach(expand);
+    }
+    expand(mapStates[mapId].data);
+    renderTree(mapId);
+}
+
+function collapseAll(mapId) {
+    function collapse(n) {
+        if (n !== mapStates[mapId].data) n.expanded = false;
+        if (n.children) n.children.forEach(collapse);
+    }
+    collapse(mapStates[mapId].data);
+    renderTree(mapId);
+}
+
+// Funções de modal de atualização
+function openUpdateModal(target) {
+    currentUpdateTarget = target;
+    document.getElementById('updateModal').classList.add('active');
+}
+
+function closeUpdateModal() {
+    document.getElementById('updateModal').classList.remove('active');
+    currentUpdateTarget = null;
+}
+
+function saveUpdate() {
+    const periodo = document.getElementById('periodo').value;
+    
+    if (!periodo) {
+        alert('Por favor, preencha o período de referência');
+        return;
+    }
+    
+    // Determinar qual dataset atualizar
+    const mapId = currentUpdateTarget === '2026' ? 'map2026' : 'mapMes';
+    const data = mapStates[mapId].data;
+    
+    // Atualizar período
+    if (periodo) {
+        data.name = `Resultados ${periodo}`;
+    }
+    
+    // Função auxiliar para formatar moeda
+    const formatCurrency = (value) => {
+        if (!value) return '';
+        return 'R$' + parseFloat(value).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    };
+    
+    // Atualizar receitas principais
+    const receitaTotal = document.getElementById('receitaTotal').value;
+    if (receitaTotal) {
+        data.value = formatCurrency(receitaTotal);
+        data.children[0].value = formatCurrency(receitaTotal);
+    }
+    
+    const receitaPlanejamento = document.getElementById('receitaPlanejamento').value;
+    if (receitaPlanejamento) {
+        data.children[0].children[0].value = formatCurrency(receitaPlanejamento);
+    }
+    
+    const receitaSeguros = document.getElementById('receitaSeguros').value;
+    if (receitaSeguros) {
+        data.children[0].children[1].value = formatCurrency(receitaSeguros);
+    }
+    
+    const receitaCreditos = document.getElementById('receitaCreditos').value;
+    if (receitaCreditos) {
+        data.children[0].children[2].value = formatCurrency(receitaCreditos);
+    }
+    
+    // Planejamento
+    const planejamentoContratado = document.getElementById('planejamentoContratado').value;
+    if (planejamentoContratado) {
+        data.children[0].children[0].children[0].value = formatCurrency(planejamentoContratado);
+    }
+    
+    const planejamentoNovo = document.getElementById('planejamentoNovo').value;
+    if (planejamentoNovo) {
+        data.children[0].children[0].children[0].children[0].value = formatCurrency(planejamentoNovo);
+    }
+    
+    const renovacao = document.getElementById('renovacao').value;
+    if (renovacao) {
+        data.children[0].children[0].children[0].children[1].value = formatCurrency(renovacao);
+    }
+    
+    const churnFaturamento = document.getElementById('churnFaturamento').value;
+    if (churnFaturamento) {
+        data.children[0].children[0].children[0].children[2].value = churnFaturamento + '%';
+    }
+    
+    const contatosAA = document.getElementById('contatosAA').value;
+    if (contatosAA) {
+        data.children[0].children[0].children[0].children[0].children[0].children[0].value = contatosAA + '%';
+    }
+    
+    const leads = document.getElementById('leads').value;
+    if (leads) {
+        data.children[0].children[0].children[0].children[0].children[0].children[0].children[0].value = leads;
+    }
+    
+    // Fontes dos Leads
+    const leadsAquisicaoDigital = document.getElementById('leadsAquisicaoDigital').value;
+    if (leadsAquisicaoDigital) {
+        data.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[0].value = leadsAquisicaoDigital;
+    }
+    
+    const leadsRedesSociais = document.getElementById('leadsRedesSociais').value;
+    if (leadsRedesSociais) {
+        data.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[1].value = leadsRedesSociais;
+    }
+    
+    const leadsPalestra = document.getElementById('leadsPalestra').value;
+    if (leadsPalestra) {
+        data.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[2].value = leadsPalestra;
+    }
+    
+    const leadsIndicacoesAAI = document.getElementById('leadsIndicacoesAAI').value;
+    if (leadsIndicacoesAAI) {
+        data.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[3].value = leadsIndicacoesAAI;
+    }
+    
+    const leadsRestante = document.getElementById('leadsRestante').value;
+    if (leadsRestante) {
+        data.children[0].children[0].children[0].children[0].children[0].children[0].children[0].children[4].value = leadsRestante;
+    }
+    
+    const analiseAgendada = document.getElementById('analiseAgendada').value;
+    if (analiseAgendada) {
+        data.children[0].children[0].children[0].children[0].children[0].children[1].value = analiseAgendada;
+    }
+    
+    const aaPP = document.getElementById('aaPP').value;
+    if (aaPP) {
+        data.children[0].children[0].children[0].children[0].children[0].children[1].children[0].value = aaPP + '%';
+    }
+    
+    const planejamentos = document.getElementById('planejamentos').value;
+    if (planejamentos) {
+        data.children[0].children[0].children[0].children[0].children[0].children[1].children[0].children[0].value = planejamentos;
+    }
+    
+    const ticketMedioPlan = document.getElementById('ticketMedioPlan').value;
+    if (ticketMedioPlan) {
+        data.children[0].children[0].children[0].children[0].children[1].value = formatCurrency(ticketMedioPlan);
+    }
+    
+    const eficienciaRenovacao = document.getElementById('eficienciaRenovacao').value;
+    if (eficienciaRenovacao) {
+        data.children[0].children[0].children[0].children[1].children[0].value = eficienciaRenovacao + '%';
+    }
+    
+    const ticketMedioRenov = document.getElementById('ticketMedioRenov').value;
+    if (ticketMedioRenov) {
+        data.children[0].children[0].children[0].children[1].children[1].value = formatCurrency(ticketMedioRenov);
+    }
+    
+    // Por Planejador - Planejamento
+    const contatosPorPlanejador = document.getElementById('contatosPorPlanejador').value;
+    if (contatosPorPlanejador) {
+        data.children[0].children[0].children[0].children[3].children[0].value = contatosPorPlanejador;
+    }
+    
+    const analisesPorPlanejador = document.getElementById('analisesPorPlanejador').value;
+    if (analisesPorPlanejador) {
+        data.children[0].children[0].children[0].children[3].children[1].value = analisesPorPlanejador;
+    }
+    
+    const producaoPorPlanejadorPlan = document.getElementById('producaoPorPlanejadorPlan').value;
+    if (producaoPorPlanejadorPlan) {
+        data.children[0].children[0].children[0].children[3].children[2].value = formatCurrency(producaoPorPlanejadorPlan);
+    }
+    
+    // Seguros
+    const segurosNovos = document.getElementById('segurosNovos').value;
+    if (segurosNovos) {
+        data.children[0].children[1].children[0].value = formatCurrency(segurosNovos);
+    }
+    
+    const inscricaoBase = document.getElementById('inscricaoBase').value;
+    if (inscricaoBase) {
+        data.children[0].children[1].children[0].children[0].value = inscricaoBase + '%';
+    }
+    
+    const ticketMedioSeguros = document.getElementById('ticketMedioSeguros').value;
+    if (ticketMedioSeguros) {
+        data.children[0].children[1].children[0].children[1].value = formatCurrency(ticketMedioSeguros);
+    }
+    
+    const oportunidadeGR = document.getElementById('oportunidadeGR').value;
+    if (oportunidadeGR) {
+        data.children[0].children[1].children[0].children[2].children[0].value = oportunidadeGR + '%';
+    }
+    
+    const oportunidadesSeguros = document.getElementById('oportunidadesSeguros').value;
+    if (oportunidadesSeguros) {
+        data.children[0].children[1].children[0].children[2].children[0].children[0].value = oportunidadesSeguros;
+    }
+    
+    const grImplantado = document.getElementById('grImplantado').value;
+    if (grImplantado) {
+        data.children[0].children[1].children[0].children[2].children[1].value = grImplantado + '%';
+    }
+    
+    const reunioes = document.getElementById('reunioes').value;
+    if (reunioes) {
+        data.children[0].children[1].children[0].children[2].children[1].children[0].value = reunioes;
+    }
+    
+    // Por Planejador - Seguros
+    const oportunidadesPorPlanejadorSeg = document.getElementById('oportunidadesPorPlanejadorSeg').value;
+    if (oportunidadesPorPlanejadorSeg) {
+        data.children[0].children[1].children[0].children[3].children[0].value = oportunidadesPorPlanejadorSeg;
+    }
+    
+    const grsPorPlanejador = document.getElementById('grsPorPlanejador').value;
+    if (grsPorPlanejador) {
+        data.children[0].children[1].children[0].children[3].children[1].value = grsPorPlanejador;
+    }
+    
+    const producaoPorPlanejadorSeg = document.getElementById('producaoPorPlanejadorSeg').value;
+    if (producaoPorPlanejadorSeg) {
+        data.children[0].children[1].children[0].children[3].children[2].value = formatCurrency(producaoPorPlanejadorSeg);
+    }
+    
+    // Créditos
+    const creditosOutros = document.getElementById('creditosOutros').value;
+    if (creditosOutros) {
+        data.children[0].children[2].children[0].value = formatCurrency(creditosOutros);
+    }
+    
+    const ticketMedioCreditos = document.getElementById('ticketMedioCreditos').value;
+    if (ticketMedioCreditos) {
+        data.children[0].children[2].children[0].children[1].value = formatCurrency(ticketMedioCreditos);
+    }
+    
+    const eficienciaCreditos = document.getElementById('eficienciaCreditos').value;
+    if (eficienciaCreditos) {
+        data.children[0].children[2].children[0].children[0].value = eficienciaCreditos + '% Oportunidade/Venda';
+    }
+    
+    const oportunidadesCreditos = document.getElementById('oportunidadesCreditos').value;
+    if (oportunidadesCreditos) {
+        data.children[0].children[2].children[0].children[0].children[0].value = oportunidadesCreditos;
+    }
+    
+    const vendasCreditos = document.getElementById('vendasCreditos').value;
+    if (vendasCreditos) {
+        data.children[0].children[2].children[0].children[0].children[0].children[0].value = vendasCreditos;
+    }
+    
+    // Por Planejador - Créditos
+    const oportunidadesPorPlanejadorCred = document.getElementById('oportunidadesPorPlanejadorCred').value;
+    if (oportunidadesPorPlanejadorCred) {
+        data.children[0].children[2].children[0].children[2].children[0].value = oportunidadesPorPlanejadorCred;
+    }
+    
+    const vendasPorPlanejador = document.getElementById('vendasPorPlanejador').value;
+    if (vendasPorPlanejador) {
+        data.children[0].children[2].children[0].children[2].children[1].value = vendasPorPlanejador;
+    }
+    
+    const producaoPorPlanejadorCred = document.getElementById('producaoPorPlanejadorCred').value;
+    if (producaoPorPlanejadorCred) {
+        data.children[0].children[2].children[0].children[2].children[2].value = formatCurrency(producaoPorPlanejadorCred);
+    }
+    
+    // Renderizar mapa atualizado
+    renderTree(mapId);
+    
+    closeUpdateModal();
+    alert('✅ Dados atualizados com sucesso!');
+}
+
+function closeUpdateModal() {
+    document.getElementById('updateModal').classList.remove('active');
+    currentUpdateTarget = null;
+}
+
+// Funções de insights
+function openInsightModal(target) {
+    currentInsightTarget = target;
+    document.getElementById('insightModal').classList.add('active');
+}
+
+function closeInsightModal() {
+    document.getElementById('insightModal').classList.remove('active');
+    document.getElementById('insightText').value = '';
+    document.getElementById('insightType').value = '';
+    currentInsightTarget = null;
+}
+
+function saveInsight() {
+    const text = document.getElementById('insightText').value;
+    const type = document.getElementById('insightType').value;
+    
+    if (!text.trim()) {
+        alert('Por favor, escreva uma reflexão');
+        return;
+    }
+    
+    const containerMap = {
+        '2025': 'insights2025',
+        '2026': 'insights2026',
+        'mes': 'insightsMes'
+    };
+    
+    const container = document.getElementById(containerMap[currentInsightTarget]);
+    
+    // Remover empty state se existir
+    const emptyState = container.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    const insightDiv = document.createElement('div');
+    insightDiv.className = `insight-item ${type}`;
+    insightDiv.innerHTML = `
+        <p>${text}</p>
+        <button class="delete-insight-btn" onclick="this.parentElement.remove()">×</button>
+    `;
+    
+    container.appendChild(insightDiv);
+    closeInsightModal();
+}
+
+// Drag para mover os mapas
+['map-container-2025', 'map-container-2026', 'map-container-mes'].forEach(containerId => {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    let isDragging = false;
+    let startX, startY, scrollLeft, scrollTop;
+
+    container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startX = e.pageX - container.offsetLeft;
+        startY = e.pageY - container.offsetTop;
+        scrollLeft = container.scrollLeft;
+        scrollTop = container.scrollTop;
+    });
+
+    container.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        const x = e.pageX - container.offsetLeft;
+        const y = e.pageY - container.offsetTop;
+        const walkX = (x - startX) * 1.5;
+        const walkY = (y - startY) * 1.5;
+        container.scrollLeft = scrollLeft - walkX;
+        container.scrollTop = scrollTop - walkY;
+    });
+
+    container.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+
+    container.addEventListener('mouseleave', () => {
+        isDragging = false;
+    });
+});
+
+// Fechar modais clicando fora
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            if (modal.id === 'updateModal') closeUpdateModal();
+            if (modal.id === 'insightModal') closeInsightModal();
+        }
+    });
+});
+
+// Renderizar mapa inicial (2025)
+renderTree('map2025');
+</script>
+</body></html>
