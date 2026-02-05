@@ -418,414 +418,8 @@
     </style>
 
     <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js">
-// ============================================
-// PERSISTÊNCIA DE REFLEXÕES
-// ============================================
-
-async function saveInsight() {
-    const text = document.getElementById('insightText').value;
-    const type = document.getElementById('insightType').value;
-    
-    if (!text.trim()) {
-        alert('Por favor, escreva uma reflexão');
-        return;
-    }
-    
-    const containerMap = {
-        '2025': 'insights2025',
-        '2026': 'insights2026',
-        'mes': 'insightsMes'
-    };
-    
-    const container = document.getElementById(containerMap[currentInsightTarget]);
-    
-    const emptyState = container.querySelector('.empty-state');
-    if (emptyState) {
-        emptyState.remove();
-    }
-    
-    const insightDiv = document.createElement('div');
-    insightDiv.className = `insight-item ${type}`;
-    insightDiv.innerHTML = `
-        <p>${text}</p>
-        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-    `;
-    
-    container.appendChild(insightDiv);
-    
-    // Salvar no Firebase/localStorage
-    await saveInsightsToStorage(currentInsightTarget);
-    
-    closeInsightModal();
-}
-
-async function deleteInsight(btn) {
-    const insightItem = btn.parentElement;
-    const container = insightItem.parentElement;
-    insightItem.remove();
-    
-    const targetMap = {
-        'insights2025': '2025',
-        'insights2026': '2026',
-        'insightsMes': 'mes'
-    };
-    const target = targetMap[container.id];
-    
-    if (container.children.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">📝</div>
-                <p>Nenhuma reflexão adicionada ainda</p>
-            </div>
-        `;
-    }
-    
-    if (target) {
-        await saveInsightsToStorage(target);
-    }
-}
-
-async function saveInsightsToStorage(target) {
-    const containerMap = {
-        '2025': 'insights2025',
-        '2026': 'insights2026',
-        'mes': 'insightsMes'
-    };
-    
-    const container = document.getElementById(containerMap[target]);
-    const insights = [];
-    
-    container.querySelectorAll('.insight-item').forEach(item => {
-        const text = item.querySelector('p').textContent;
-        const type = item.classList.contains('warning') ? 'warning' : 
-                    item.classList.contains('critical') ? 'critical' : '';
-        insights.push({ text, type });
-    });
-    
-    // Salvar no Firebase
-    if (useFirebase && database) {
-        try {
-            await database.ref(`brauna_insights/${target}`).set(insights);
-            console.log(`💾 Reflexões ${target} salvas no Firebase`);
-        } catch (error) {
-            console.error('Erro ao salvar reflexões no Firebase:', error);
-            localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
-        }
-    } else {
-        localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
-    }
-}
-
-async function loadInsightsFromStorage() {
-    const configs = [
-        { target: '2025', container: 'insights2025' },
-        { target: '2026', container: 'insights2026' },
-        { target: 'mes', container: 'insightsMes' }
-    ];
-    
-    for (const config of configs) {
-        let insights = null;
-        
-        // Tentar carregar do Firebase primeiro
-        if (useFirebase && database) {
-            try {
-                const snapshot = await database.ref(`brauna_insights/${config.target}`).once('value');
-                insights = snapshot.val();
-                if (insights) {
-                    console.log(`📥 Reflexões ${config.target} carregadas do Firebase`);
-                }
-            } catch (error) {
-                console.error('Erro ao carregar reflexões do Firebase:', error);
-            }
-        }
-        
-        // Fallback para localStorage
-        if (!insights) {
-            const saved = localStorage.getItem(`brauna_insights_${config.target}`);
-            if (saved) {
-                insights = JSON.parse(saved);
-                console.log(`📥 Reflexões ${config.target} carregadas do localStorage`);
-            }
-        }
-        
-        // Renderizar insights
-        if (insights && insights.length > 0) {
-            const container = document.getElementById(config.container);
-            
-            // Limpar container (remover apenas insights antigos, não o empty state)
-            const oldInsights = container.querySelectorAll('.insight-item');
-            oldInsights.forEach(item => item.remove());
-            
-            // Remover empty state se existir
-            const emptyState = container.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.remove();
-            }
-            
-            // Adicionar insights carregados
-            insights.forEach(insight => {
-                const insightDiv = document.createElement('div');
-                insightDiv.className = `insight-item ${insight.type}`;
-                insightDiv.innerHTML = `
-                    <p>${insight.text}</p>
-                    <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-                `;
-                container.appendChild(insightDiv);
-            });
-        }
-    }
-}
-
-// Escutar mudanças em tempo real no Firebase
-if (useFirebase && database) {
-    ['2025', '2026', 'mes'].forEach(target => {
-        database.ref(`brauna_insights/${target}`).on('value', (snapshot) => {
-            const insights = snapshot.val();
-            if (insights) {
-                const containerMap = {
-                    '2025': 'insights2025',
-                    '2026': 'insights2026',
-                    'mes': 'insightsMes'
-                };
-                const container = document.getElementById(containerMap[target]);
-                
-                // Limpar insights antigos
-                const oldInsights = container.querySelectorAll('.insight-item');
-                oldInsights.forEach(item => item.remove());
-                
-                // Remover empty state
-                const emptyState = container.querySelector('.empty-state');
-                if (emptyState) {
-                    emptyState.remove();
-                }
-                
-                // Adicionar novos insights
-                insights.forEach(insight => {
-                    const insightDiv = document.createElement('div');
-                    insightDiv.className = `insight-item ${insight.type}`;
-                    insightDiv.innerHTML = `
-                        <p>${insight.text}</p>
-                        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-                    `;
-                    container.appendChild(insightDiv);
-                });
-            }
-        });
-    });
-}
-
-// Carregar reflexões quando a página carregar
-setTimeout(() => {
-    loadInsightsFromStorage();
-}, 1000);
-
-
-</script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js">
-// ============================================
-// PERSISTÊNCIA DE REFLEXÕES
-// ============================================
-
-async function saveInsight() {
-    const text = document.getElementById('insightText').value;
-    const type = document.getElementById('insightType').value;
-    
-    if (!text.trim()) {
-        alert('Por favor, escreva uma reflexão');
-        return;
-    }
-    
-    const containerMap = {
-        '2025': 'insights2025',
-        '2026': 'insights2026',
-        'mes': 'insightsMes'
-    };
-    
-    const container = document.getElementById(containerMap[currentInsightTarget]);
-    
-    const emptyState = container.querySelector('.empty-state');
-    if (emptyState) {
-        emptyState.remove();
-    }
-    
-    const insightDiv = document.createElement('div');
-    insightDiv.className = `insight-item ${type}`;
-    insightDiv.innerHTML = `
-        <p>${text}</p>
-        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-    `;
-    
-    container.appendChild(insightDiv);
-    
-    // Salvar no Firebase/localStorage
-    await saveInsightsToStorage(currentInsightTarget);
-    
-    closeInsightModal();
-}
-
-async function deleteInsight(btn) {
-    const insightItem = btn.parentElement;
-    const container = insightItem.parentElement;
-    insightItem.remove();
-    
-    const targetMap = {
-        'insights2025': '2025',
-        'insights2026': '2026',
-        'insightsMes': 'mes'
-    };
-    const target = targetMap[container.id];
-    
-    if (container.children.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">📝</div>
-                <p>Nenhuma reflexão adicionada ainda</p>
-            </div>
-        `;
-    }
-    
-    if (target) {
-        await saveInsightsToStorage(target);
-    }
-}
-
-async function saveInsightsToStorage(target) {
-    const containerMap = {
-        '2025': 'insights2025',
-        '2026': 'insights2026',
-        'mes': 'insightsMes'
-    };
-    
-    const container = document.getElementById(containerMap[target]);
-    const insights = [];
-    
-    container.querySelectorAll('.insight-item').forEach(item => {
-        const text = item.querySelector('p').textContent;
-        const type = item.classList.contains('warning') ? 'warning' : 
-                    item.classList.contains('critical') ? 'critical' : '';
-        insights.push({ text, type });
-    });
-    
-    // Salvar no Firebase
-    if (useFirebase && database) {
-        try {
-            await database.ref(`brauna_insights/${target}`).set(insights);
-            console.log(`💾 Reflexões ${target} salvas no Firebase`);
-        } catch (error) {
-            console.error('Erro ao salvar reflexões no Firebase:', error);
-            localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
-        }
-    } else {
-        localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
-    }
-}
-
-async function loadInsightsFromStorage() {
-    const configs = [
-        { target: '2025', container: 'insights2025' },
-        { target: '2026', container: 'insights2026' },
-        { target: 'mes', container: 'insightsMes' }
-    ];
-    
-    for (const config of configs) {
-        let insights = null;
-        
-        // Tentar carregar do Firebase primeiro
-        if (useFirebase && database) {
-            try {
-                const snapshot = await database.ref(`brauna_insights/${config.target}`).once('value');
-                insights = snapshot.val();
-                if (insights) {
-                    console.log(`📥 Reflexões ${config.target} carregadas do Firebase`);
-                }
-            } catch (error) {
-                console.error('Erro ao carregar reflexões do Firebase:', error);
-            }
-        }
-        
-        // Fallback para localStorage
-        if (!insights) {
-            const saved = localStorage.getItem(`brauna_insights_${config.target}`);
-            if (saved) {
-                insights = JSON.parse(saved);
-                console.log(`📥 Reflexões ${config.target} carregadas do localStorage`);
-            }
-        }
-        
-        // Renderizar insights
-        if (insights && insights.length > 0) {
-            const container = document.getElementById(config.container);
-            
-            // Limpar container (remover apenas insights antigos, não o empty state)
-            const oldInsights = container.querySelectorAll('.insight-item');
-            oldInsights.forEach(item => item.remove());
-            
-            // Remover empty state se existir
-            const emptyState = container.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.remove();
-            }
-            
-            // Adicionar insights carregados
-            insights.forEach(insight => {
-                const insightDiv = document.createElement('div');
-                insightDiv.className = `insight-item ${insight.type}`;
-                insightDiv.innerHTML = `
-                    <p>${insight.text}</p>
-                    <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-                `;
-                container.appendChild(insightDiv);
-            });
-        }
-    }
-}
-
-// Escutar mudanças em tempo real no Firebase
-if (useFirebase && database) {
-    ['2025', '2026', 'mes'].forEach(target => {
-        database.ref(`brauna_insights/${target}`).on('value', (snapshot) => {
-            const insights = snapshot.val();
-            if (insights) {
-                const containerMap = {
-                    '2025': 'insights2025',
-                    '2026': 'insights2026',
-                    'mes': 'insightsMes'
-                };
-                const container = document.getElementById(containerMap[target]);
-                
-                // Limpar insights antigos
-                const oldInsights = container.querySelectorAll('.insight-item');
-                oldInsights.forEach(item => item.remove());
-                
-                // Remover empty state
-                const emptyState = container.querySelector('.empty-state');
-                if (emptyState) {
-                    emptyState.remove();
-                }
-                
-                // Adicionar novos insights
-                insights.forEach(insight => {
-                    const insightDiv = document.createElement('div');
-                    insightDiv.className = `insight-item ${insight.type}`;
-                    insightDiv.innerHTML = `
-                        <p>${insight.text}</p>
-                        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-                    `;
-                    container.appendChild(insightDiv);
-                });
-            }
-        });
-    });
-}
-
-// Carregar reflexões quando a página carregar
-setTimeout(() => {
-    loadInsightsFromStorage();
-}, 1000);
-
-
-</script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
     </head>
 <body>
     <div class="container">
@@ -1225,212 +819,9 @@ setTimeout(() => {
         </div>
     </div>
 
-    <script><script>
+    <script>
         // JavaScript code will be embedded here
-    
-// ============================================
-// PERSISTÊNCIA DE REFLEXÕES
-// ============================================
-
-async function saveInsight() {
-    const text = document.getElementById('insightText').value;
-    const type = document.getElementById('insightType').value;
-    
-    if (!text.trim()) {
-        alert('Por favor, escreva uma reflexão');
-        return;
-    }
-    
-    const containerMap = {
-        '2025': 'insights2025',
-        '2026': 'insights2026',
-        'mes': 'insightsMes'
-    };
-    
-    const container = document.getElementById(containerMap[currentInsightTarget]);
-    
-    const emptyState = container.querySelector('.empty-state');
-    if (emptyState) {
-        emptyState.remove();
-    }
-    
-    const insightDiv = document.createElement('div');
-    insightDiv.className = `insight-item ${type}`;
-    insightDiv.innerHTML = `
-        <p>${text}</p>
-        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-    `;
-    
-    container.appendChild(insightDiv);
-    
-    // Salvar no Firebase/localStorage
-    await saveInsightsToStorage(currentInsightTarget);
-    
-    closeInsightModal();
-}
-
-async function deleteInsight(btn) {
-    const insightItem = btn.parentElement;
-    const container = insightItem.parentElement;
-    insightItem.remove();
-    
-    const targetMap = {
-        'insights2025': '2025',
-        'insights2026': '2026',
-        'insightsMes': 'mes'
-    };
-    const target = targetMap[container.id];
-    
-    if (container.children.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">📝</div>
-                <p>Nenhuma reflexão adicionada ainda</p>
-            </div>
-        `;
-    }
-    
-    if (target) {
-        await saveInsightsToStorage(target);
-    }
-}
-
-async function saveInsightsToStorage(target) {
-    const containerMap = {
-        '2025': 'insights2025',
-        '2026': 'insights2026',
-        'mes': 'insightsMes'
-    };
-    
-    const container = document.getElementById(containerMap[target]);
-    const insights = [];
-    
-    container.querySelectorAll('.insight-item').forEach(item => {
-        const text = item.querySelector('p').textContent;
-        const type = item.classList.contains('warning') ? 'warning' : 
-                    item.classList.contains('critical') ? 'critical' : '';
-        insights.push({ text, type });
-    });
-    
-    // Salvar no Firebase
-    if (useFirebase && database) {
-        try {
-            await database.ref(`brauna_insights/${target}`).set(insights);
-            console.log(`💾 Reflexões ${target} salvas no Firebase`);
-        } catch (error) {
-            console.error('Erro ao salvar reflexões no Firebase:', error);
-            localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
-        }
-    } else {
-        localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
-    }
-}
-
-async function loadInsightsFromStorage() {
-    const configs = [
-        { target: '2025', container: 'insights2025' },
-        { target: '2026', container: 'insights2026' },
-        { target: 'mes', container: 'insightsMes' }
-    ];
-    
-    for (const config of configs) {
-        let insights = null;
-        
-        // Tentar carregar do Firebase primeiro
-        if (useFirebase && database) {
-            try {
-                const snapshot = await database.ref(`brauna_insights/${config.target}`).once('value');
-                insights = snapshot.val();
-                if (insights) {
-                    console.log(`📥 Reflexões ${config.target} carregadas do Firebase`);
-                }
-            } catch (error) {
-                console.error('Erro ao carregar reflexões do Firebase:', error);
-            }
-        }
-        
-        // Fallback para localStorage
-        if (!insights) {
-            const saved = localStorage.getItem(`brauna_insights_${config.target}`);
-            if (saved) {
-                insights = JSON.parse(saved);
-                console.log(`📥 Reflexões ${config.target} carregadas do localStorage`);
-            }
-        }
-        
-        // Renderizar insights
-        if (insights && insights.length > 0) {
-            const container = document.getElementById(config.container);
-            
-            // Limpar container (remover apenas insights antigos, não o empty state)
-            const oldInsights = container.querySelectorAll('.insight-item');
-            oldInsights.forEach(item => item.remove());
-            
-            // Remover empty state se existir
-            const emptyState = container.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.remove();
-            }
-            
-            // Adicionar insights carregados
-            insights.forEach(insight => {
-                const insightDiv = document.createElement('div');
-                insightDiv.className = `insight-item ${insight.type}`;
-                insightDiv.innerHTML = `
-                    <p>${insight.text}</p>
-                    <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-                `;
-                container.appendChild(insightDiv);
-            });
-        }
-    }
-}
-
-// Escutar mudanças em tempo real no Firebase
-if (useFirebase && database) {
-    ['2025', '2026', 'mes'].forEach(target => {
-        database.ref(`brauna_insights/${target}`).on('value', (snapshot) => {
-            const insights = snapshot.val();
-            if (insights) {
-                const containerMap = {
-                    '2025': 'insights2025',
-                    '2026': 'insights2026',
-                    'mes': 'insightsMes'
-                };
-                const container = document.getElementById(containerMap[target]);
-                
-                // Limpar insights antigos
-                const oldInsights = container.querySelectorAll('.insight-item');
-                oldInsights.forEach(item => item.remove());
-                
-                // Remover empty state
-                const emptyState = container.querySelector('.empty-state');
-                if (emptyState) {
-                    emptyState.remove();
-                }
-                
-                // Adicionar novos insights
-                insights.forEach(insight => {
-                    const insightDiv = document.createElement('div');
-                    insightDiv.className = `insight-item ${insight.type}`;
-                    insightDiv.innerHTML = `
-                        <p>${insight.text}</p>
-                        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-                    `;
-                    container.appendChild(insightDiv);
-                });
-            }
-        });
-    });
-}
-
-// Carregar reflexões quando a página carregar
-setTimeout(() => {
-    loadInsightsFromStorage();
-}, 1000);
-
-
-</script>
+    </script>
     
 </body>
 </html><script>
@@ -1499,6 +890,102 @@ async function resetData(target) {
     
     await saveData();
     alert('✅ Dados resetados!');
+}
+
+async function saveInsightsToStorage(target) {
+    const containerMap = {
+        '2025': 'insights2025',
+        '2026': 'insights2026',
+        'mes': 'insightsMes'
+    };
+    
+    const container = document.getElementById(containerMap[target]);
+    const insights = [];
+    
+    container.querySelectorAll('.insight-item').forEach(item => {
+        const text = item.querySelector('p').textContent;
+        const type = item.classList.contains('warning') ? 'warning' : 
+                    item.classList.contains('critical') ? 'critical' : '';
+        insights.push({ text, type });
+    });
+    
+    if (useFirebase && database) {
+        try {
+            await database.ref(`brauna_insights/${target}`).set(insights);
+            console.log(`💾 Reflexões ${target} salvas no Firebase`);
+        } catch (error) {
+            localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
+        }
+    } else {
+        localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
+    }
+}
+
+async function loadInsightsFromStorage() {
+    const configs = [
+        { target: '2025', container: 'insights2025' },
+        { target: '2026', container: 'insights2026' },
+        { target: 'mes', container: 'insightsMes' }
+    ];
+    
+    for (const config of configs) {
+        let insights = null;
+        
+        if (useFirebase && database) {
+            try {
+                const snapshot = await database.ref(`brauna_insights/${config.target}`).once('value');
+                insights = snapshot.val();
+            } catch (error) {
+                const saved = localStorage.getItem(`brauna_insights_${config.target}`);
+                if (saved) insights = JSON.parse(saved);
+            }
+        } else {
+            const saved = localStorage.getItem(`brauna_insights_${config.target}`);
+            if (saved) insights = JSON.parse(saved);
+        }
+        
+        if (insights && insights.length > 0) {
+            const container = document.getElementById(config.container);
+            const oldInsights = container.querySelectorAll('.insight-item');
+            oldInsights.forEach(item => item.remove());
+            const emptyState = container.querySelector('.empty-state');
+            if (emptyState) emptyState.remove();
+            
+            insights.forEach(insight => {
+                const insightDiv = document.createElement('div');
+                insightDiv.className = `insight-item ${insight.type}`;
+                insightDiv.innerHTML = `
+                    <p>${insight.text}</p>
+                    <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
+                `;
+                container.appendChild(insightDiv);
+            });
+        }
+    }
+}
+
+async function deleteInsight(btn) {
+    const insightItem = btn.parentElement;
+    const container = insightItem.parentElement;
+    insightItem.remove();
+    
+    const targetMap = {
+        'insights2025': '2025',
+        'insights2026': '2026',
+        'insightsMes': 'mes'
+    };
+    const target = targetMap[container.id];
+    
+    if (container.children.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <p>Nenhuma reflexão adicionada ainda</p>
+            </div>
+        `;
+    }
+    
+    if (target) await saveInsightsToStorage(target);
 }
 
 
@@ -1713,7 +1200,7 @@ const data2025Original = {
     ]
 };
 
-// Carregar dados salvos ou usar originais
+// Carregar dados salvos
 let saved2026 = localStorage.getItem('brauna_data2026');
 let savedMes = localStorage.getItem('brauna_dataMes');
 
@@ -1734,7 +1221,7 @@ const mapStates = {
 let currentUpdateTarget = null;
 let currentInsightTarget = null;
 
-// Carregar do Firebase se disponível
+// Carregar do Firebase
 if (useFirebase && database) {
     database.ref('brauna_data').once('value').then((snapshot) => {
         const firebaseData = snapshot.val();
@@ -1747,10 +1234,21 @@ if (useFirebase && database) {
                 mapStates.mapMes.data = firebaseData.dataMes;
                 renderTree('mapMes');
             }
-            console.log('📥 Dados do Firebase carregados');
+        }
+    });
+    
+    // Escutar mudanças em tempo real
+    database.ref('brauna_data').on('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            mapStates.map2026.data = data.data2026;
+            mapStates.mapMes.data = data.dataMes;
         }
     });
 }
+
+// Carregar reflexões
+setTimeout(() => loadInsightsFromStorage(), 1000);
 
 // Funções de navegação entre abas
 function switchTab(tabName) {
@@ -2172,7 +1670,6 @@ async function saveUpdate() {
     // Renderizar mapa atualizado
     renderTree(mapId);
     
-    // Salvar dados
     await saveData();
     
     closeUpdateModal();
@@ -2197,6 +1694,42 @@ function closeInsightModal() {
     currentInsightTarget = null;
 }
 
+async function saveInsight() {
+    const text = document.getElementById('insightText').value;
+    const type = document.getElementById('insightType').value;
+    
+    if (!text.trim()) {
+        alert('Por favor, escreva uma reflexão');
+        return;
+    }
+    
+    const containerMap = {
+        '2025': 'insights2025',
+        '2026': 'insights2026',
+        'mes': 'insightsMes'
+    };
+    
+    const container = document.getElementById(containerMap[currentInsightTarget]);
+    
+    // Remover empty state se existir
+    const emptyState = container.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+    
+    const insightDiv = document.createElement('div');
+    insightDiv.className = `insight-item ${type}`;
+    insightDiv.innerHTML = `
+        <p>${text}</p>
+        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
+    `;
+    
+    container.appendChild(insightDiv);
+    
+    await saveInsightsToStorage(currentInsightTarget);
+    
+    closeInsightModal();
+}
 
 // Drag para mover os mapas
 ['map-container-2025', 'map-container-2026', 'map-container-mes'].forEach(containerId => {
@@ -2246,208 +1779,5 @@ document.querySelectorAll('.modal').forEach(modal => {
 
 // Renderizar mapa inicial (2025)
 renderTree('map2025');
-
-// ============================================
-// PERSISTÊNCIA DE REFLEXÕES
-// ============================================
-
-async function saveInsight() {
-    const text = document.getElementById('insightText').value;
-    const type = document.getElementById('insightType').value;
-    
-    if (!text.trim()) {
-        alert('Por favor, escreva uma reflexão');
-        return;
-    }
-    
-    const containerMap = {
-        '2025': 'insights2025',
-        '2026': 'insights2026',
-        'mes': 'insightsMes'
-    };
-    
-    const container = document.getElementById(containerMap[currentInsightTarget]);
-    
-    const emptyState = container.querySelector('.empty-state');
-    if (emptyState) {
-        emptyState.remove();
-    }
-    
-    const insightDiv = document.createElement('div');
-    insightDiv.className = `insight-item ${type}`;
-    insightDiv.innerHTML = `
-        <p>${text}</p>
-        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-    `;
-    
-    container.appendChild(insightDiv);
-    
-    // Salvar no Firebase/localStorage
-    await saveInsightsToStorage(currentInsightTarget);
-    
-    closeInsightModal();
-}
-
-async function deleteInsight(btn) {
-    const insightItem = btn.parentElement;
-    const container = insightItem.parentElement;
-    insightItem.remove();
-    
-    const targetMap = {
-        'insights2025': '2025',
-        'insights2026': '2026',
-        'insightsMes': 'mes'
-    };
-    const target = targetMap[container.id];
-    
-    if (container.children.length === 0) {
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">📝</div>
-                <p>Nenhuma reflexão adicionada ainda</p>
-            </div>
-        `;
-    }
-    
-    if (target) {
-        await saveInsightsToStorage(target);
-    }
-}
-
-async function saveInsightsToStorage(target) {
-    const containerMap = {
-        '2025': 'insights2025',
-        '2026': 'insights2026',
-        'mes': 'insightsMes'
-    };
-    
-    const container = document.getElementById(containerMap[target]);
-    const insights = [];
-    
-    container.querySelectorAll('.insight-item').forEach(item => {
-        const text = item.querySelector('p').textContent;
-        const type = item.classList.contains('warning') ? 'warning' : 
-                    item.classList.contains('critical') ? 'critical' : '';
-        insights.push({ text, type });
-    });
-    
-    // Salvar no Firebase
-    if (useFirebase && database) {
-        try {
-            await database.ref(`brauna_insights/${target}`).set(insights);
-            console.log(`💾 Reflexões ${target} salvas no Firebase`);
-        } catch (error) {
-            console.error('Erro ao salvar reflexões no Firebase:', error);
-            localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
-        }
-    } else {
-        localStorage.setItem(`brauna_insights_${target}`, JSON.stringify(insights));
-    }
-}
-
-async function loadInsightsFromStorage() {
-    const configs = [
-        { target: '2025', container: 'insights2025' },
-        { target: '2026', container: 'insights2026' },
-        { target: 'mes', container: 'insightsMes' }
-    ];
-    
-    for (const config of configs) {
-        let insights = null;
-        
-        // Tentar carregar do Firebase primeiro
-        if (useFirebase && database) {
-            try {
-                const snapshot = await database.ref(`brauna_insights/${config.target}`).once('value');
-                insights = snapshot.val();
-                if (insights) {
-                    console.log(`📥 Reflexões ${config.target} carregadas do Firebase`);
-                }
-            } catch (error) {
-                console.error('Erro ao carregar reflexões do Firebase:', error);
-            }
-        }
-        
-        // Fallback para localStorage
-        if (!insights) {
-            const saved = localStorage.getItem(`brauna_insights_${config.target}`);
-            if (saved) {
-                insights = JSON.parse(saved);
-                console.log(`📥 Reflexões ${config.target} carregadas do localStorage`);
-            }
-        }
-        
-        // Renderizar insights
-        if (insights && insights.length > 0) {
-            const container = document.getElementById(config.container);
-            
-            // Limpar container (remover apenas insights antigos, não o empty state)
-            const oldInsights = container.querySelectorAll('.insight-item');
-            oldInsights.forEach(item => item.remove());
-            
-            // Remover empty state se existir
-            const emptyState = container.querySelector('.empty-state');
-            if (emptyState) {
-                emptyState.remove();
-            }
-            
-            // Adicionar insights carregados
-            insights.forEach(insight => {
-                const insightDiv = document.createElement('div');
-                insightDiv.className = `insight-item ${insight.type}`;
-                insightDiv.innerHTML = `
-                    <p>${insight.text}</p>
-                    <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-                `;
-                container.appendChild(insightDiv);
-            });
-        }
-    }
-}
-
-// Escutar mudanças em tempo real no Firebase
-if (useFirebase && database) {
-    ['2025', '2026', 'mes'].forEach(target => {
-        database.ref(`brauna_insights/${target}`).on('value', (snapshot) => {
-            const insights = snapshot.val();
-            if (insights) {
-                const containerMap = {
-                    '2025': 'insights2025',
-                    '2026': 'insights2026',
-                    'mes': 'insightsMes'
-                };
-                const container = document.getElementById(containerMap[target]);
-                
-                // Limpar insights antigos
-                const oldInsights = container.querySelectorAll('.insight-item');
-                oldInsights.forEach(item => item.remove());
-                
-                // Remover empty state
-                const emptyState = container.querySelector('.empty-state');
-                if (emptyState) {
-                    emptyState.remove();
-                }
-                
-                // Adicionar novos insights
-                insights.forEach(insight => {
-                    const insightDiv = document.createElement('div');
-                    insightDiv.className = `insight-item ${insight.type}`;
-                    insightDiv.innerHTML = `
-                        <p>${insight.text}</p>
-                        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
-                    `;
-                    container.appendChild(insightDiv);
-                });
-            }
-        });
-    });
-}
-
-// Carregar reflexões quando a página carregar
-setTimeout(() => {
-    loadInsightsFromStorage();
-}, 1000);
-
-
 </script>
 </body></html>
