@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa de Indicadores Comerciais - Braúna</title>
+    <title>Mapa de Indicadores Comerciais - BraÃºna</title>
     <style>
         * {
             margin: 0;
@@ -279,7 +279,7 @@
         }
 
         .node-box.expanded::after {
-            content: '−';
+            content: 'âˆ’';
             position: absolute;
             right: -12px;
             top: 50%;
@@ -405,34 +405,39 @@
             margin-bottom: 16px;
         }
     </style>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎯 Mapa de Indicadores Comerciais - Braúna</h1>
-            <p>Visualização interativa dos resultados e gargalos operacionais</p>
+            <h1>ðŸŽ¯ Mapa de Indicadores Comerciais - BraÃºna</h1>
+            <p>VisualizaÃ§Ã£o interativa dos resultados e gargalos operacionais</p>
         </div>
         
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('consolidado2025')">📊 Consolidado 2025</button>
-            <button class="tab" onclick="switchTab('consolidado2026')">📈 Consolidado 2026</button>
-            <button class="tab" onclick="switchTab('mesAnalise')">🔍 Mês de Análise</button>
-            <button class="tab" onclick="switchTab('insights')">💭 Reflexões</button>
+            <button class="tab active" onclick="switchTab('consolidado2025')">ðŸ“Š Consolidado 2025</button>
+            <button class="tab" onclick="switchTab('consolidado2026')">ðŸ“ˆ Consolidado 2026</button>
+            <button class="tab" onclick="switchTab('mesAnalise')">ðŸ” MÃªs de AnÃ¡lise</button>
+            <button class="tab" onclick="switchTab('insights')">ðŸ’­ ReflexÃµes</button>
         </div>
 
         <!-- TAB: Consolidado 2025 -->
         <div id="consolidado2025" class="tab-content active">
             <div class="controls">
                 <div class="control-group">
-                    <button onclick="zoomIn('map2025')">🔍 Zoom +</button>
-                    <button onclick="zoomOut('map2025')">🔍 Zoom -</button>
-                    <button onclick="resetZoom('map2025')">↺ Resetar</button>
+                    <button onclick="zoomIn('map2025')">ðŸ” Zoom +</button>
+                    <button onclick="zoomOut('map2025')">ðŸ” Zoom -</button>
+                    <button onclick="resetZoom('map2025')">â†º Resetar</button>
                     <span class="zoom-level" id="zoomLevel2025">100%</span>
                 </div>
                 
                 <div class="control-group">
-                    <button onclick="expandAll('map2025')">⊕ Expandir Tudo</button>
-                    <button onclick="collapseAll('map2025')">⊖ Retrair Tudo</button>
+                    <button onclick="expandAll('map2025')">âŠ• Expandir Tudo</button>
+                    <button onclick="collapseAll('map2025')">âŠ– Retrair Tudo</button>
                 </div>
             </div>
             
@@ -447,19 +452,20 @@
         <div id="consolidado2026" class="tab-content">
             <div class="controls">
                 <div class="control-group">
-                    <button onclick="zoomIn('map2026')">🔍 Zoom +</button>
-                    <button onclick="zoomOut('map2026')">🔍 Zoom -</button>
-                    <button onclick="resetZoom('map2026')">↺ Resetar</button>
+                    <button onclick="zoomIn('map2026')">ðŸ” Zoom +</button>
+                    <button onclick="zoomOut('map2026')">ðŸ” Zoom -</button>
+                    <button onclick="resetZoom('map2026')">â†º Resetar</button>
                     <span class="zoom-level" id="zoomLevel2026">100%</span>
                 </div>
                 
                 <div class="control-group">
-                    <button onclick="expandAll('map2026')">⊕ Expandir Tudo</button>
-                    <button onclick="collapseAll('map2026')">⊖ Retrair Tudo</button>
+                    <button onclick="expandAll('map2026')">âŠ• Expandir Tudo</button>
+                    <button onclick="collapseAll('map2026')">âŠ– Retrair Tudo</button>
                 </div>
                 
                 <div class="control-group">
-                    <button class="btn-primary" onclick="openUpdateModal('2026')">📊 Atualizar Dados</button>
+                    <button class="btn-primary" onclick="openUpdateModal('2026')">ðŸ“Š Atualizar Dados</button>
+                    <button onclick="resetData('2026')" style="background: #e74c3c; border-color: #e74c3c; color: white;">🔄 Resetar Dados</button>
                 </div>
             </div>
             
@@ -470,24 +476,25 @@
             </div>
         </div>
 
-        <!-- TAB: Mês de Análise -->
+        <!-- TAB: MÃªs de AnÃ¡lise -->
         <div id="mesAnalise" class="tab-content">
             <div class="controls">
                 <div class="control-group">
-                    <button onclick="zoomIn('mapMes')">🔍 Zoom +</button>
-                    <button onclick="zoomOut('mapMes')">🔍 Zoom -</button>
-                    <button onclick="resetZoom('mapMes')">↺ Resetar</button>
+                    <button onclick="zoomIn('mapMes')">ðŸ” Zoom +</button>
+                    <button onclick="zoomOut('mapMes')">ðŸ” Zoom -</button>
+                    <button onclick="resetZoom('mapMes')">â†º Resetar</button>
                     <span class="zoom-level" id="zoomLevelMes">100%</span>
                 </div>
                 
                 <div class="control-group">
-                    <button onclick="expandAll('mapMes')">⊕ Expandir Tudo</button>
-                    <button onclick="collapseAll('mapMes')">⊖ Retrair Tudo</button>
+                    <button onclick="expandAll('mapMes')">âŠ• Expandir Tudo</button>
+                    <button onclick="collapseAll('mapMes')">âŠ– Retrair Tudo</button>
                 </div>
                 
                 <div class="control-group">
-                    <button class="btn-primary" onclick="openUpdateModal('mes')">📊 Atualizar Dados</button>
+                    <button class="btn-primary" onclick="openUpdateModal('mes')">ðŸ“Š Atualizar Dados</button>
                 </div>
+                    <button onclick="resetData('mes')" style="background: #e74c3c; border-color: #e74c3c; color: white;">🔄 Resetar Dados</button>
             </div>
             
             <div class="content-wrapper">
@@ -497,64 +504,64 @@
             </div>
         </div>
 
-        <!-- TAB: Reflexões -->
+        <!-- TAB: ReflexÃµes -->
         <div id="insights" class="tab-content">
             <div class="insights-container">
                 <div class="insights-section">
-                    <h2>💭 Reflexões - Consolidado 2025</h2>
+                    <h2>ðŸ’­ ReflexÃµes - Consolidado 2025</h2>
                     <div id="insights2025">
                         <div class="insight-item warning">
-                            <p>Conseguimos a geração de contatos almejada, no entanto 48% vindo de fontes que não são tão eficientes (AD + Redes Sociais)</p>
-                            <button class="delete-insight-btn" onclick="this.parentElement.remove()">×</button>
+                            <p>Conseguimos a geraÃ§Ã£o de contatos almejada, no entanto 48% vindo de fontes que nÃ£o sÃ£o tÃ£o eficientes (AD + Redes Sociais)</p>
+                            <button class="delete-insight-btn" onclick="this.parentElement.remove()">Ã—</button>
                         </div>
                         <div class="insight-item critical">
                             <p>Churn Faturamento muito acima do esperado</p>
-                            <button class="delete-insight-btn" onclick="this.parentElement.remove()">×</button>
+                            <button class="delete-insight-btn" onclick="this.parentElement.remove()">Ã—</button>
                         </div>
                         <div class="insight-item warning">
-                            <p>Crédito e Seguros trabalhando em eficiência e não em volume → Será que é sustentável ao longo do tempo?</p>
-                            <button class="delete-insight-btn" onclick="this.parentElement.remove()">×</button>
+                            <p>CrÃ©dito e Seguros trabalhando em eficiÃªncia e nÃ£o em volume â†’ SerÃ¡ que Ã© sustentÃ¡vel ao longo do tempo?</p>
+                            <button class="delete-insight-btn" onclick="this.parentElement.remove()">Ã—</button>
                         </div>
                     </div>
-                    <button class="btn-primary add-insight-btn" onclick="openInsightModal('2025')">+ Adicionar Reflexão</button>
+                    <button class="btn-primary add-insight-btn" onclick="openInsightModal('2025')">+ Adicionar ReflexÃ£o</button>
                 </div>
 
                 <div class="insights-section">
-                    <h2>💭 Reflexões - Consolidado 2026</h2>
+                    <h2>ðŸ’­ ReflexÃµes - Consolidado 2026</h2>
                     <div id="insights2026">
                         <div class="empty-state">
-                            <div class="empty-state-icon">📝</div>
-                            <p>Nenhuma reflexão adicionada ainda</p>
+                            <div class="empty-state-icon">ðŸ“</div>
+                            <p>Nenhuma reflexÃ£o adicionada ainda</p>
                         </div>
                     </div>
-                    <button class="btn-primary add-insight-btn" onclick="openInsightModal('2026')">+ Adicionar Reflexão</button>
+                    <button class="btn-primary add-insight-btn" onclick="openInsightModal('2026')">+ Adicionar ReflexÃ£o</button>
                 </div>
 
                 <div class="insights-section">
-                    <h2>💭 Reflexões - Mês de Análise</h2>
+                    <h2>ðŸ’­ ReflexÃµes - MÃªs de AnÃ¡lise</h2>
                     <div id="insightsMes">
                         <div class="empty-state">
-                            <div class="empty-state-icon">📝</div>
-                            <p>Nenhuma reflexão adicionada ainda</p>
+                            <div class="empty-state-icon">ðŸ“</div>
+                            <p>Nenhuma reflexÃ£o adicionada ainda</p>
                         </div>
                     </div>
-                    <button class="btn-primary add-insight-btn" onclick="openInsightModal('mes')">+ Adicionar Reflexão</button>
+                    <button class="btn-primary add-insight-btn" onclick="openInsightModal('mes')">+ Adicionar ReflexÃ£o</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Atualização -->
+    <!-- Modal de AtualizaÃ§Ã£o -->
     <div id="updateModal" class="modal">
         <div class="modal-content" style="max-width: 800px;">
             <h2>Atualizar Indicadores</h2>
             
             <div class="form-group">
-                <label>Período/Mês de Referência:</label>
+                <label>PerÃ­odo/MÃªs de ReferÃªncia:</label>
                 <input type="text" id="periodo" placeholder="Ex: Janeiro 2026">
             </div>
 
-            <h3 style="margin: 24px 0 16px 0; color: #333; font-size: 18px;">💰 Receitas Principais</h3>
+            <h3 style="margin: 24px 0 16px 0; color: #333; font-size: 18px;">ðŸ’° Receitas Principais</h3>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div class="form-group">
@@ -570,12 +577,12 @@
                     <input type="number" id="receitaSeguros" placeholder="643966">
                 </div>
                 <div class="form-group">
-                    <label>Receita Créditos (R$):</label>
+                    <label>Receita CrÃ©ditos (R$):</label>
                     <input type="number" id="receitaCreditos" placeholder="1066000">
                 </div>
             </div>
 
-            <h3 style="margin: 24px 0 16px 0; color: #5dade2; font-size: 18px;">🔵 Planejamento</h3>
+            <h3 style="margin: 24px 0 16px 0; color: #5dade2; font-size: 18px;">ðŸ”µ Planejamento</h3>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div class="form-group">
@@ -587,7 +594,7 @@
                     <input type="number" id="planejamentoNovo" placeholder="4267000">
                 </div>
                 <div class="form-group">
-                    <label>Renovação (R$):</label>
+                    <label>RenovaÃ§Ã£o (R$):</label>
                     <input type="number" id="renovacao" placeholder="990740">
                 </div>
                 <div class="form-group">
@@ -608,7 +615,7 @@
                 <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Fontes dos Leads:</label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Aquisição Digital:</label>
+                        <label style="font-size: 13px;">AquisiÃ§Ã£o Digital:</label>
                         <input type="number" id="leadsAquisicaoDigital" placeholder="1546">
                     </div>
                     <div class="form-group" style="margin-bottom: 8px;">
@@ -620,7 +627,7 @@
                         <input type="number" id="leadsPalestra" placeholder="966">
                     </div>
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Indicações AAI:</label>
+                        <label style="font-size: 13px;">IndicaÃ§Ãµes AAI:</label>
                         <input type="number" id="leadsIndicacoesAAI" placeholder="138">
                     </div>
                     <div class="form-group" style="margin-bottom: 8px;">
@@ -632,7 +639,7 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px;">
                 <div class="form-group">
-                    <label>Análise Agendada (qtd):</label>
+                    <label>AnÃ¡lise Agendada (qtd):</label>
                     <input type="number" id="analiseAgendada" placeholder="4147">
                 </div>
                 <div class="form-group">
@@ -644,38 +651,38 @@
                     <input type="number" id="planejamentos" placeholder="1103">
                 </div>
                 <div class="form-group">
-                    <label>Ticket Médio Plan. (R$):</label>
+                    <label>Ticket MÃ©dio Plan. (R$):</label>
                     <input type="number" id="ticketMedioPlan" step="0.01" placeholder="441.67">
                 </div>
                 <div class="form-group">
-                    <label>Eficiência Renovação (%):</label>
+                    <label>EficiÃªncia RenovaÃ§Ã£o (%):</label>
                     <input type="number" id="eficienciaRenovacao" step="0.01" placeholder="29.79">
                 </div>
                 <div class="form-group">
-                    <label>Ticket Médio Renov. (R$):</label>
+                    <label>Ticket MÃ©dio Renov. (R$):</label>
                     <input type="number" id="ticketMedioRenov" step="0.01" placeholder="500">
                 </div>
             </div>
 
             <div style="margin: 16px 0 0 20px;">
-                <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Produção por Planejador:</label>
+                <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">ProduÃ§Ã£o por Planejador:</label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Contatos por mês:</label>
+                        <label style="font-size: 13px;">Contatos por mÃªs:</label>
                         <input type="number" id="contatosPorPlanejador" step="0.01" placeholder="16">
                     </div>
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Análises por mês:</label>
+                        <label style="font-size: 13px;">AnÃ¡lises por mÃªs:</label>
                         <input type="number" id="analisesPorPlanejador" step="0.01" placeholder="7.05">
                     </div>
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Produção por mês (R$):</label>
+                        <label style="font-size: 13px;">ProduÃ§Ã£o por mÃªs (R$):</label>
                         <input type="number" id="producaoPorPlanejadorPlan" step="0.01" placeholder="11500">
                     </div>
                 </div>
             </div>
 
-            <h3 style="margin: 24px 0 16px 0; color: #f4d03f; font-size: 18px;">🟡 Seguros</h3>
+            <h3 style="margin: 24px 0 16px 0; color: #f4d03f; font-size: 18px;">ðŸŸ¡ Seguros</h3>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div class="form-group">
@@ -683,11 +690,11 @@
                     <input type="number" id="segurosNovos" placeholder="1428000">
                 </div>
                 <div class="form-group">
-                    <label>Inscrição Base Ativa (%):</label>
+                    <label>InscriÃ§Ã£o Base Ativa (%):</label>
                     <input type="number" id="inscricaoBase" step="0.01" placeholder="39.88">
                 </div>
                 <div class="form-group">
-                    <label>Ticket Médio Seguros (R$):</label>
+                    <label>Ticket MÃ©dio Seguros (R$):</label>
                     <input type="number" id="ticketMedioSeguros" step="0.01" placeholder="256.21">
                 </div>
                 <div class="form-group">
@@ -703,7 +710,7 @@
                     <input type="number" id="grImplantado" step="0.01" placeholder="52.9">
                 </div>
                 <div class="form-group">
-                    <label>Reuniões (qtd):</label>
+                    <label>ReuniÃµes (qtd):</label>
                     <input type="number" id="reunioes" placeholder="454">
                 </div>
             </div>
@@ -712,33 +719,33 @@
                 <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Por Planejador - Seguros:</label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Oportunidades por mês:</label>
+                        <label style="font-size: 13px;">Oportunidades por mÃªs:</label>
                         <input type="number" id="oportunidadesPorPlanejadorSeg" step="0.01" placeholder="1.86">
                     </div>
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">GRs por mês:</label>
+                        <label style="font-size: 13px;">GRs por mÃªs:</label>
                         <input type="number" id="grsPorPlanejador" step="0.01" placeholder="0.77">
                     </div>
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Produção por mês (R$):</label>
+                        <label style="font-size: 13px;">ProduÃ§Ã£o por mÃªs (R$):</label>
                         <input type="number" id="producaoPorPlanejadorSeg" step="0.01" placeholder="2428">
                     </div>
                 </div>
             </div>
 
-            <h3 style="margin: 24px 0 16px 0; color: #7dcea0; font-size: 18px;">🟢 Créditos</h3>
+            <h3 style="margin: 24px 0 16px 0; color: #7dcea0; font-size: 18px;">ðŸŸ¢ CrÃ©ditos</h3>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                 <div class="form-group">
-                    <label>Créditos e Outros (R$):</label>
+                    <label>CrÃ©ditos e Outros (R$):</label>
                     <input type="number" id="creditosOutros" placeholder="57400000">
                 </div>
                 <div class="form-group">
-                    <label>Ticket Médio Créd. (R$):</label>
+                    <label>Ticket MÃ©dio CrÃ©d. (R$):</label>
                     <input type="number" id="ticketMedioCreditos" placeholder="526000">
                 </div>
                 <div class="form-group">
-                    <label>Eficiência Oport./Venda (%):</label>
+                    <label>EficiÃªncia Oport./Venda (%):</label>
                     <input type="number" id="eficienciaCreditos" step="0.01" placeholder="54.22">
                 </div>
                 <div class="form-group">
@@ -752,52 +759,52 @@
             </div>
 
             <div style="margin: 16px 0 0 20px;">
-                <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Por Planejador - Créditos:</label>
+                <label style="font-size: 14px; color: #666; margin-bottom: 8px; display: block;">Por Planejador - CrÃ©ditos:</label>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Oportunidades por mês:</label>
+                        <label style="font-size: 13px;">Oportunidades por mÃªs:</label>
                         <input type="number" id="oportunidadesPorPlanejadorCred" step="0.01" placeholder="0.34">
                     </div>
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Vendas por mês:</label>
+                        <label style="font-size: 13px;">Vendas por mÃªs:</label>
                         <input type="number" id="vendasPorPlanejador" step="0.01" placeholder="0.18">
                     </div>
                     <div class="form-group" style="margin-bottom: 8px;">
-                        <label style="font-size: 13px;">Produção por mês (R$):</label>
+                        <label style="font-size: 13px;">ProduÃ§Ã£o por mÃªs (R$):</label>
                         <input type="number" id="producaoPorPlanejadorCred" step="0.01" placeholder="97620">
                     </div>
                 </div>
             </div>
 
             <div style="display: flex; gap: 12px; margin-top: 32px;">
-                <button class="btn-primary" onclick="saveUpdate()" style="flex: 1;">✓ Salvar Dados</button>
-                <button class="btn-close" onclick="closeUpdateModal()">✕ Cancelar</button>
+                <button class="btn-primary" onclick="saveUpdate()" style="flex: 1;">âœ“ Salvar Dados</button>
+                <button class="btn-close" onclick="closeUpdateModal()">âœ• Cancelar</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal de Reflexões -->
+    <!-- Modal de ReflexÃµes -->
     <div id="insightModal" class="modal">
         <div class="modal-content">
-            <h2>Adicionar Reflexão</h2>
+            <h2>Adicionar ReflexÃ£o</h2>
             
             <div class="form-group">
-                <label>Tipo de Reflexão:</label>
+                <label>Tipo de ReflexÃ£o:</label>
                 <select id="insightType">
                     <option value="">Informativo</option>
-                    <option value="warning">⚠️ Atenção</option>
-                    <option value="critical">🔴 Crítico</option>
+                    <option value="warning">âš ï¸ AtenÃ§Ã£o</option>
+                    <option value="critical">ðŸ”´ CrÃ­tico</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Descrição da Reflexão:</label>
-                <textarea id="insightText" placeholder="Descreva a reflexão..."></textarea>
+                <label>DescriÃ§Ã£o da ReflexÃ£o:</label>
+                <textarea id="insightText" placeholder="Descreva a reflexÃ£o..."></textarea>
             </div>
 
             <div style="display: flex; gap: 12px; margin-top: 32px;">
-                <button class="btn-primary" onclick="saveInsight()" style="flex: 1;">✓ Adicionar</button>
-                <button class="btn-close" onclick="closeInsightModal()">✕ Cancelar</button>
+                <button class="btn-primary" onclick="saveInsight()" style="flex: 1;">âœ“ Adicionar</button>
+                <button class="btn-close" onclick="closeInsightModal()">âœ• Cancelar</button>
             </div>
         </div>
     </div>
@@ -808,8 +815,8 @@
     
 </body>
 </html><script>
-// Dados 2025 (fixos - não serão atualizados)
-const data2025 = {
+// Dados 2025 originais (fixos - backup para reset)
+const data2025Original = {
     name: "Resultados 2025",
     value: "R$6.344.000,00",
     color: "#667eea",
@@ -840,7 +847,7 @@ const data2025 = {
                                     expanded: false,
                                     children: [
                                         {
-                                            name: "Eficiência",
+                                            name: "EficiÃªncia",
                                             value: "",
                                             color: "#5dade2",
                                             expanded: false,
@@ -857,17 +864,17 @@ const data2025 = {
                                                             color: "#5dade2",
                                                             expanded: false,
                                                             children: [
-                                                                { name: "Aquisição Digital", value: "1546", color: "#5dade2" },
+                                                                { name: "AquisiÃ§Ã£o Digital", value: "1546", color: "#5dade2" },
                                                                 { name: "Redes Sociais", value: "3763", color: "#5dade2" },
                                                                 { name: "Palestra", value: "966", color: "#5dade2" },
-                                                                { name: "Indicações AAI", value: "138", color: "#5dade2" },
+                                                                { name: "IndicaÃ§Ãµes AAI", value: "138", color: "#5dade2" },
                                                                 { name: "Restante", value: "4604", color: "#5dade2" }
                                                             ]
                                                         }
                                                     ]
                                                 },
                                                 {
-                                                    name: "Análise Agendada",
+                                                    name: "AnÃ¡lise Agendada",
                                                     value: "4147",
                                                     color: "#5dade2",
                                                     expanded: false,
@@ -885,29 +892,29 @@ const data2025 = {
                                                 }
                                             ]
                                         },
-                                        { name: "Ticket Médio", value: "R$441,67", color: "#5dade2" }
+                                        { name: "Ticket MÃ©dio", value: "R$441,67", color: "#5dade2" }
                                     ]
                                 },
                                 {
-                                    name: "Renovação",
+                                    name: "RenovaÃ§Ã£o",
                                     value: "R$990.740,00",
                                     color: "#5dade2",
                                     expanded: false,
                                     children: [
-                                        { name: "Eficiência", value: "29,79%", color: "#5dade2" },
-                                        { name: "Ticket Médio", value: "R$500,00", color: "#5dade2" }
+                                        { name: "EficiÃªncia", value: "29,79%", color: "#5dade2" },
+                                        { name: "Ticket MÃ©dio", value: "R$500,00", color: "#5dade2" }
                                     ]
                                 },
                                 { name: "Churn Faturamento", value: "23,16%", color: "#5dade2" },
                                 {
-                                    name: "Produção por Planejador",
+                                    name: "ProduÃ§Ã£o por Planejador",
                                     value: "",
                                     color: "#5dade2",
                                     expanded: false,
                                     children: [
-                                        { name: "Contatos por mês", value: "16", color: "#5dade2" },
-                                        { name: "Análises por mês", value: "7,05", color: "#5dade2" },
-                                        { name: "Produção por mês", value: "R$11.500", color: "#5dade2" }
+                                        { name: "Contatos por mÃªs", value: "16", color: "#5dade2" },
+                                        { name: "AnÃ¡lises por mÃªs", value: "7,05", color: "#5dade2" },
+                                        { name: "ProduÃ§Ã£o por mÃªs", value: "R$11.500", color: "#5dade2" }
                                     ]
                                 }
                             ]
@@ -926,10 +933,10 @@ const data2025 = {
                             color: "#f4d03f",
                             expanded: false,
                             children: [
-                                { name: "Inscrição na base ativa", value: "39,88%", color: "#f4d03f" },
-                                { name: "Ticket Médio", value: "R$256,21", color: "#f4d03f" },
+                                { name: "InscriÃ§Ã£o na base ativa", value: "39,88%", color: "#f4d03f" },
+                                { name: "Ticket MÃ©dio", value: "R$256,21", color: "#f4d03f" },
                                 {
-                                    name: "Eficiência",
+                                    name: "EficiÃªncia",
                                     value: "",
                                     color: "#f4d03f",
                                     expanded: false,
@@ -949,7 +956,7 @@ const data2025 = {
                                             color: "#f4d03f",
                                             expanded: false,
                                             children: [
-                                                { name: "Reuniões", value: "454", color: "#f4d03f" }
+                                                { name: "ReuniÃµes", value: "454", color: "#f4d03f" }
                                             ]
                                         }
                                     ]
@@ -960,9 +967,9 @@ const data2025 = {
                                     color: "#f4d03f",
                                     expanded: false,
                                     children: [
-                                        { name: "Oportunidades por mês", value: "1,86", color: "#f4d03f" },
-                                        { name: "GRs por mês", value: "0,77", color: "#f4d03f" },
-                                        { name: "Produção por mês", value: "R$2.428", color: "#f4d03f" }
+                                        { name: "Oportunidades por mÃªs", value: "1,86", color: "#f4d03f" },
+                                        { name: "GRs por mÃªs", value: "0,77", color: "#f4d03f" },
+                                        { name: "ProduÃ§Ã£o por mÃªs", value: "R$2.428", color: "#f4d03f" }
                                     ]
                                 }
                             ]
@@ -970,19 +977,19 @@ const data2025 = {
                     ]
                 },
                 {
-                    name: "Receita Créditos",
+                    name: "Receita CrÃ©ditos",
                     value: "R$1.066.000,00",
                     color: "#7dcea0",
                     expanded: false,
                     children: [
                         {
-                            name: "Créditos e Outros",
+                            name: "CrÃ©ditos e Outros",
                             value: "R$57.400.000,00",
                             color: "#7dcea0",
                             expanded: false,
                             children: [
                                 {
-                                    name: "Eficiência",
+                                    name: "EficiÃªncia",
                                     value: "54,22% Oportunidade/Venda",
                                     color: "#7dcea0",
                                     expanded: false,
@@ -998,16 +1005,16 @@ const data2025 = {
                                         }
                                     ]
                                 },
-                                { name: "Ticket Médio", value: "R$526.000,00", color: "#7dcea0" },
+                                { name: "Ticket MÃ©dio", value: "R$526.000,00", color: "#7dcea0" },
                                 {
                                     name: "Por Planejador",
                                     value: "",
                                     color: "#7dcea0",
                                     expanded: false,
                                     children: [
-                                        { name: "Oportunidades por mês", value: "0,34", color: "#7dcea0" },
-                                        { name: "Vendas por mês", value: "0,18", color: "#7dcea0" },
-                                        { name: "Produção por mês", value: "R$97.620", color: "#7dcea0" }
+                                        { name: "Oportunidades por mÃªs", value: "0,34", color: "#7dcea0" },
+                                        { name: "Vendas por mÃªs", value: "0,18", color: "#7dcea0" },
+                                        { name: "ProduÃ§Ã£o por mÃªs", value: "R$97.620", color: "#7dcea0" }
                                     ]
                                 }
                             ]
@@ -1019,12 +1026,76 @@ const data2025 = {
     ]
 };
 
-// Dados 2026 e Mês (editáveis)
-let data2026 = JSON.parse(JSON.stringify(data2025));
-data2026.name = "Resultados 2026";
+// ============================================
+// SISTEMA DE PERSISTÊNCIA COM LOCALSTORAGE
+// ============================================
 
-let dataMes = JSON.parse(JSON.stringify(data2025));
-dataMes.name = "Mês de Análise";
+// Função para carregar dados do localStorage ou usar dados originais
+function loadData() {
+    const saved2025 = localStorage.getItem('brauna_data2025');
+    const saved2026 = localStorage.getItem('brauna_data2026');
+    const savedMes = localStorage.getItem('brauna_dataMes');
+    
+    return {
+        data2025: saved2025 ? JSON.parse(saved2025) : JSON.parse(JSON.stringify(data2025Original)),
+        data2026: saved2026 ? JSON.parse(saved2026) : JSON.parse(JSON.stringify(data2025Original)),
+        dataMes: savedMes ? JSON.parse(savedMes) : JSON.parse(JSON.stringify(data2025Original))
+    };
+}
+
+// Função para salvar dados no localStorage
+function saveData() {
+    localStorage.setItem('brauna_data2025', JSON.stringify(mapStates.map2025.data));
+    localStorage.setItem('brauna_data2026', JSON.stringify(mapStates.map2026.data));
+    localStorage.setItem('brauna_dataMes', JSON.stringify(mapStates.mapMes.data));
+}
+
+// Função para resetar dados aos valores originais
+function resetData(target) {
+    if (confirm('⚠️ Tem certeza que deseja resetar os dados para os valores originais? Esta ação não pode ser desfeita.')) {
+        if (target === '2026' || target === 'all') {
+            mapStates.map2026.data = JSON.parse(JSON.stringify(data2025Original));
+            mapStates.map2026.data.name = "Resultados 2026";
+            localStorage.setItem('brauna_data2026', JSON.stringify(mapStates.map2026.data));
+            renderTree('map2026');
+        }
+        
+        if (target === 'mes' || target === 'all') {
+            mapStates.mapMes.data = JSON.parse(JSON.stringify(data2025Original));
+            mapStates.mapMes.data.name = "Mês de Análise";
+            localStorage.setItem('brauna_dataMes', JSON.stringify(mapStates.mapMes.data));
+            renderTree('mapMes');
+        }
+        
+        if (target === '2025' || target === 'all') {
+            mapStates.map2025.data = JSON.parse(JSON.stringify(data2025Original));
+            mapStates.map2025.data.name = "Resultados 2025";
+            localStorage.setItem('brauna_data2025', JSON.stringify(mapStates.map2025.data));
+            renderTree('map2025');
+        }
+        
+        // Resetar insights também
+        if (target === 'all') {
+            localStorage.removeItem('brauna_insights2025');
+            localStorage.removeItem('brauna_insights2026');
+            localStorage.removeItem('brauna_insightsMes');
+            location.reload(); // Recarregar página para limpar insights
+        }
+        
+        alert('✅ Dados resetados com sucesso!');
+    }
+}
+
+// Carregar dados salvos ou usar originais
+const loadedData = loadData();
+const data2025 = loadedData.data2025;
+let data2026 = loadedData.data2026;
+let dataMes = loadedData.dataMes;
+
+// Garantir nomes corretos
+data2025.name = "Resultados 2025";
+data2026.name = data2026.name || "Resultados 2026";
+dataMes.name = dataMes.name || "Mês de Análise";
 
 // Estados dos mapas
 const mapStates = {
@@ -1036,7 +1107,7 @@ const mapStates = {
 let currentUpdateTarget = null;
 let currentInsightTarget = null;
 
-// Funções de navegação entre abas
+// FunÃ§Ãµes de navegaÃ§Ã£o entre abas
 function switchTab(tabName) {
     // Desativar todas as abas
     document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
@@ -1046,7 +1117,7 @@ function switchTab(tabName) {
     event.target.classList.add('active');
     document.getElementById(tabName).classList.add('active');
     
-    // Renderizar mapa se ainda não foi renderizado
+    // Renderizar mapa se ainda nÃ£o foi renderizado
     const mapId = tabName === 'consolidado2025' ? 'map2025' : 
                   tabName === 'consolidado2026' ? 'map2026' : 'mapMes';
     
@@ -1056,7 +1127,7 @@ function switchTab(tabName) {
     }
 }
 
-// Funções de renderização do mapa
+// FunÃ§Ãµes de renderizaÃ§Ã£o do mapa
 function renderTree(mapId) {
     const map = document.getElementById(mapId);
     map.innerHTML = '';
@@ -1152,7 +1223,7 @@ function toggleNode(node, mapId) {
     }
 }
 
-// Funções de zoom
+// FunÃ§Ãµes de zoom
 function zoomIn(mapId) {
     mapStates[mapId].zoom *= 1.2;
     const map = document.getElementById(mapId);
@@ -1197,7 +1268,7 @@ function collapseAll(mapId) {
     renderTree(mapId);
 }
 
-// Funções de modal de atualização
+// FunÃ§Ãµes de modal de atualizaÃ§Ã£o
 function openUpdateModal(target) {
     currentUpdateTarget = target;
     document.getElementById('updateModal').classList.add('active');
@@ -1212,7 +1283,7 @@ function saveUpdate() {
     const periodo = document.getElementById('periodo').value;
     
     if (!periodo) {
-        alert('Por favor, preencha o período de referência');
+        alert('Por favor, preencha o perÃ­odo de referÃªncia');
         return;
     }
     
@@ -1220,12 +1291,12 @@ function saveUpdate() {
     const mapId = currentUpdateTarget === '2026' ? 'map2026' : 'mapMes';
     const data = mapStates[mapId].data;
     
-    // Atualizar período
+    // Atualizar perÃ­odo
     if (periodo) {
         data.name = `Resultados ${periodo}`;
     }
     
-    // Função auxiliar para formatar moeda
+    // FunÃ§Ã£o auxiliar para formatar moeda
     const formatCurrency = (value) => {
         if (!value) return '';
         return 'R$' + parseFloat(value).toLocaleString('pt-BR', {
@@ -1411,7 +1482,7 @@ function saveUpdate() {
         data.children[0].children[1].children[0].children[3].children[2].value = formatCurrency(producaoPorPlanejadorSeg);
     }
     
-    // Créditos
+    // CrÃ©ditos
     const creditosOutros = document.getElementById('creditosOutros').value;
     if (creditosOutros) {
         data.children[0].children[2].children[0].value = formatCurrency(creditosOutros);
@@ -1437,7 +1508,7 @@ function saveUpdate() {
         data.children[0].children[2].children[0].children[0].children[0].children[0].value = vendasCreditos;
     }
     
-    // Por Planejador - Créditos
+    // Por Planejador - CrÃ©ditos
     const oportunidadesPorPlanejadorCred = document.getElementById('oportunidadesPorPlanejadorCred').value;
     if (oportunidadesPorPlanejadorCred) {
         data.children[0].children[2].children[0].children[2].children[0].value = oportunidadesPorPlanejadorCred;
@@ -1456,8 +1527,11 @@ function saveUpdate() {
     // Renderizar mapa atualizado
     renderTree(mapId);
     
+    // 💾 SALVAR NO LOCALSTORAGE
+    saveData();
+    
     closeUpdateModal();
-    alert('✅ Dados atualizados com sucesso!');
+    alert('✅ Dados atualizados e salvos com sucesso!');
 }
 
 function closeUpdateModal() {
@@ -1465,7 +1539,7 @@ function closeUpdateModal() {
     currentUpdateTarget = null;
 }
 
-// Funções de insights
+// FunÃ§Ãµes de insights
 function openInsightModal(target) {
     currentInsightTarget = target;
     document.getElementById('insightModal').classList.add('active');
@@ -1505,11 +1579,102 @@ function saveInsight() {
     insightDiv.className = `insight-item ${type}`;
     insightDiv.innerHTML = `
         <p>${text}</p>
-        <button class="delete-insight-btn" onclick="this.parentElement.remove()">×</button>
+        <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
     `;
     
     container.appendChild(insightDiv);
+    
+    // 💾 Salvar insights no localStorage
+    saveInsights(currentInsightTarget);
+    
     closeInsightModal();
+}
+
+// Função para deletar insight e salvar
+function deleteInsight(btn) {
+    const insightItem = btn.parentElement;
+    const container = insightItem.parentElement;
+    insightItem.remove();
+    
+    // Descobrir qual é o target baseado no ID do container
+    const targetMap = {
+        'insights2025': '2025',
+        'insights2026': '2026',
+        'insightsMes': 'mes'
+    };
+    const target = targetMap[container.id];
+    
+    // Adicionar empty state se não houver mais insights
+    if (container.children.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📝</div>
+                <p>Nenhuma reflexão adicionada ainda</p>
+            </div>
+        `;
+    }
+    
+    // Salvar mudanças
+    if (target) {
+        saveInsights(target);
+    }
+}
+
+// Função para salvar insights no localStorage
+function saveInsights(target) {
+    const containerMap = {
+        '2025': 'insights2025',
+        '2026': 'insights2026',
+        'mes': 'insightsMes'
+    };
+    
+    const localStorageMap = {
+        '2025': 'brauna_insights2025',
+        '2026': 'brauna_insights2026',
+        'mes': 'brauna_insightsMes'
+    };
+    
+    const container = document.getElementById(containerMap[target]);
+    const insights = [];
+    
+    container.querySelectorAll('.insight-item').forEach(item => {
+        const text = item.querySelector('p').textContent;
+        const type = item.classList.contains('warning') ? 'warning' : 
+                    item.classList.contains('critical') ? 'critical' : '';
+        insights.push({ text, type });
+    });
+    
+    localStorage.setItem(localStorageMap[target], JSON.stringify(insights));
+}
+
+// Função para carregar insights do localStorage
+function loadInsights() {
+    const configs = [
+        { target: '2025', key: 'brauna_insights2025', container: 'insights2025' },
+        { target: '2026', key: 'brauna_insights2026', container: 'insights2026' },
+        { target: 'mes', key: 'brauna_insightsMes', container: 'insightsMes' }
+    ];
+    
+    configs.forEach(config => {
+        const saved = localStorage.getItem(config.key);
+        if (saved) {
+            const insights = JSON.parse(saved);
+            const container = document.getElementById(config.container);
+            
+            // Limpar container (remover empty state ou insights existentes)
+            container.innerHTML = '';
+            
+            insights.forEach(insight => {
+                const insightDiv = document.createElement('div');
+                insightDiv.className = `insight-item ${insight.type}`;
+                insightDiv.innerHTML = `
+                    <p>${insight.text}</p>
+                    <button class="delete-insight-btn" onclick="deleteInsight(this)">×</button>
+                `;
+                container.appendChild(insightDiv);
+            });
+        }
+    });
 }
 
 // Drag para mover os mapas
@@ -1558,7 +1723,11 @@ document.querySelectorAll('.modal').forEach(modal => {
     });
 });
 
+// 🚀 INICIALIZAÇÃO DA PÁGINA
 // Renderizar mapa inicial (2025)
 renderTree('map2025');
+
+// Carregar insights salvos
+loadInsights();
 </script>
 </body></html>
